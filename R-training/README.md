@@ -59,28 +59,30 @@ station. This would have the following coordinates:
 Analysis of spatiotemporal data is somewhat different from pure spatial
 analysis. Time is not only 3rd dimension i.e. it has specific
 
-For ERWIG et al. (1999) spatio-temporal data sets and corresponding
-databases can be matched with the two major groups of features: (1)
-**moving or dynamic objects** (discrete or vector geometries), and (2)
-**regions** (fields or continuous features). Distinct objects (entities)
-such as people, animals, vehicles and similar are best represented using
-vectors and trajectories (movement through time), and fields can be
-represented using gridded structures. In the case of working with
-fields, we basically map either:
+For [Erwig, Gu, Schneider, Vazirgiannis, & others](#ref-erwig1999spatio)
+([1999](#ref-erwig1999spatio)) spatio-temporal data sets and
+corresponding databases can be matched with the two major groups of
+features: (1) **moving or dynamic objects** (discrete or vector
+geometries), and (2) **regions** (fields or continuous features).
+Distinct objects (entities) such as people, animals, vehicles and
+similar are best represented using vectors and trajectories (movement
+through time), and fields can be represented using gridded structures.
+In the case of working with fields, we basically map either:
 
 -   quantity or density of some material or chemical element,
 -   energy flux or any similar physical measurements,
 -   probability of occurrence of some feature or object,
 
 Spatiotemporal data can be best visualize using space-time cubes. One
-example of a spacetime cube is the following plot \[@hengl2012spatio\]:
+example of a spacetime cube is the following plot ([Hengl, Heuvelink,
+Tadić, & Pebesma, 2012](#ref-hengl2012spatio)):
 
 <img src="img/Fig_space_time_cube.png" width="750"/>
 
 *Figure: Space-time cube visualized in R: (a) cloud plot showing
 location of meteorological stations in Croatia, (b) illustration of
-spatial and temporal support in the space-time cube
-\[@hengl2012spatio\].*
+spatial and temporal support in the space-time cube ([Hengl, Heuvelink,
+Tadić, & Pebesma, 2012](#ref-hengl2012spatio)).*
 
 This shows distribution of meteorological stations over Croatia, and
 then repeated measurements through time. The spatial and temporal
@@ -110,9 +112,10 @@ interglacials](https://en.wikipedia.org/wiki/Ice_age)):
 
 <img src="img/Fig_global_mean_temp_longterm_trend.png" width="750"/>
 
-*Figure: Global temperature reconstruction from proxy data of
-@Marcott1198. This shows how global temperature varies on long-term
-term. Graph by: Klaus Bitterman.*
+*Figure: Global temperature reconstruction from proxy data of [Marcott,
+Shakun, Clark, & Mix](#ref-Marcott1198) ([2013](#ref-Marcott1198)). This
+shows how global temperature varies on long-term term. Graph by: Klaus
+Bitterman.*
 
 Seasonal and daily components of variation of land surface temperature
 are basically determined by Earth’s rotation and angles of Sun. This is
@@ -120,13 +123,14 @@ a relatively deterministic part of variation as Earth’s rotation is
 relatively stable hence the patterns produced are distinct (periodic
 sinusoidal curves or similar). The plot below shows variation of values
 of soil moisture and soil temperature at one meteo station in USA
-\[@gasch2015spatio\]:
+([Gasch et al., 2015](#ref-gasch2015spatio)):
 
 <img src="img/Fig_cookfarm_plots_seasonality.png" width="750"/>
 
 *Figure: Sensor values from five depths (0.3, 0.6, 0.9, 1.2, and 1.5 m)
 at one station at Cook Agronomy Farm from January 2011–January 2014. The
-black line indicates locally fitted splines \[@gasch2015spatio\].*
+black line indicates locally fitted splines ([Gasch et al.,
+2015](#ref-gasch2015spatio)).*
 
 As we will see later, the seasonal part of variation can be modeling
 using latitude, altitude and time/day of the year.
@@ -143,8 +147,9 @@ Spatial data is usually visualized using static or interactive maps (see
 e.g. [mapview](https://r-spatial.github.io/mapview/) and/or [tmap
 package](https://cran.r-project.org/web/packages/tmap/vignettes/tmap-getstarted.html)).
 Spatiotemporal data (2D+T) is more complex to visualize, while 3D+T data
-can even require some expertise in the field \[@hengl2015plotkml\]
-before user can make any seamless interpretation.
+can even require some expertise in the field ([Hengl, Roudier,
+Beaudette, Pebesma, & others, 2015](#ref-hengl2015plotkml)) before user
+can make any seamless interpretation.
 
 There are three possible groups of ways to visualize spatiotemporal
 data:
@@ -157,14 +162,15 @@ data:
     allowing users to choose *speed* and *direction* of animation.
 
 For an introduction to visualizying spatiotemporal and time-series data
-is @lamigueiro2014displaying. More complex visualization of
+is [Lamigueiro](#ref-lamigueiro2014displaying)
+([2014](#ref-lamigueiro2014displaying)). More complex visualization of
 spatiotemporal / dynamic features is possible by using the
 <https://geemap.org/> package (*A Python package for interactive mapping
 with Google Earth Engine, ipyleaflet, and ipywidgets*). OpenLandMap.org
 has multiple temporal datasets and users can interactive with
 time-dimension by using the time-slider implemented in [OpenLayers +
-Geoserver](http://osgl.grf.bg.ac.rs/books/gvvk-en/)
-\[@KilibardaProtic2019\].
+Geoserver](http://osgl.grf.bg.ac.rs/books/gvvk-en/) ([M. Kilibarda &
+Protić, 2019](#ref-KilibardaProtic2019)).
 
 <img src="img/Fig_HILDA_visualization_landcover.gif" width="750"/>
 
@@ -189,14 +195,17 @@ find relationship between the target variable and some EO data
 resolution.
 
 For more in-depth discussion on spatitemporal data in R please refer to
-@wikle2019spatio. For in-depth discussion on spatial and spatiotemporal
-blocking for purpose of modeling building and cross-validation refer to
-@Roberts2017.
+[Wikle, Zammit-Mangion, & Cressie](#ref-wikle2019spatio)
+([2019](#ref-wikle2019spatio)). For in-depth discussion on spatial and
+spatiotemporal blocking for purpose of modeling building and
+cross-validation refer to [Roberts et al.](#ref-Roberts2017)
+([2017](#ref-Roberts2017)).
 
 #### Modeling seasonal components
 
 The seasonal component of variation is determined by Earth’s rotation
-and Sun’s angle. @kilibarda2014spatio have shown that the seasonal
+and Sun’s angle. [Milan Kilibarda et al.](#ref-kilibarda2014spatio)
+([2014](#ref-kilibarda2014spatio)) have shown that the seasonal
 component e.g. geometric Earth surface minimum and maximum temperature,
 which can be modeled universally anywhere on globe by using the
 following formula:
@@ -336,6 +345,13 @@ very well the noise component we have inserted on purpose using the
 
 ``` r
 library(randomForest)
+```
+
+    ## randomForest 4.6-14
+
+    ## Type rfNews() to see new features/changes/bug fixes.
+
+``` r
 rf = randomForest::randomForest(data.frame(x=x), y, nodesize = 5, keep.inbag = TRUE)
 rf
 ```
@@ -350,8 +366,9 @@ rf
     ##           Mean of squared residuals: 202.6445
     ##                     % Var explained: 78.34
 
-Next, we can estimate the prediction errors using the method of
-@lu2021unified, which is available via the `forestError` package:
+Next, we can estimate the prediction errors using the method of [Lu &
+Hardin](#ref-lu2021unified) ([2021](#ref-lu2021unified)), which is
+available via the `forestError` package:
 
 ``` r
 library(forestError)
@@ -417,22 +434,52 @@ any further down the pipeline over-optimistic prediction uncertainty can
 result in decision makers being over-confident, leading to wrong
 decisions, and consequently making users losing any confidence in RF.
 For an in-depth discussion on extrapolation problems and *Area of
-Applicability* of Machine Learning models please refer to
-@meyerPebesma2020.
+Applicability* of Machine Learning models please refer to [Meyer &
+Pebesma](#ref-meyerPebesma2020) ([2020](#ref-meyerPebesma2020)).
 
 A possible solution to the problem above is to, instead of using only
 one learners, we use multiple learners and then apply robust
 cross-validation that prevents the target model from over-fitting. This
 can be implemented efficiently by using the `mlr` package for example
-@bischl2016mlr. We can run an Ensemble Model by applying the following
-four steps. First, we define the task of interest and a combination of
-learners:
+[Bischl et al.](#ref-bischl2016mlr) ([2016](#ref-bischl2016mlr)). We can
+run an Ensemble Model by applying the following four steps. First, we
+define the task of interest and a combination of learners:
 
 ``` r
 library(mlr)
+```
+
+    ## Loading required package: ParamHelpers
+
+    ## 'mlr' is in maintenance mode since July 2019. Future development
+    ## efforts will go into its successor 'mlr3' (<https://mlr3.mlr-org.com>).
+
+``` r
 library(kernlab)
 library(mboost)
+```
+
+    ## Loading required package: parallel
+
+    ## Loading required package: stabs
+
+    ## 
+    ## Attaching package: 'stabs'
+
+    ## The following object is masked from 'package:mlr':
+    ## 
+    ##     subsample
+
+    ## This is mboost 2.9-2. See 'package?mboost' and 'news(package  = "mboost")'
+    ## for a complete list of changes.
+
+``` r
 library(landmap)
+```
+
+    ## version: 0.0.12
+
+``` r
 SL.library = c("regr.ranger", "regr.glm", "regr.gamboost", "regr.ksvm")
 lrns <- lapply(SL.library, mlr::makeLearner)
 tsk <- mlr::makeRegrTask(data = dat, target = "y")
@@ -449,11 +496,13 @@ init.m <- mlr::makeStackedLearner(lrns, method = "stack.cv", super.learner = "re
 eml = train(init.m, tsk)
 ```
 
-    ## Warning in bsplines(mf[[i]], knots = args$knots[[i]]$knots, boundary.knots = args$knots[[i]]$boundary.knots, : Some 'x' values are
-    ## beyond 'boundary.knots'; Linear extrapolation used.
+    ## Warning in bsplines(mf[[i]], knots = args$knots[[i]]$knots, boundary.knots =
+    ## args$knots[[i]]$boundary.knots, : Some 'x' values are beyond 'boundary.knots';
+    ## Linear extrapolation used.
 
-    ## Warning in bsplines(mf[[i]], knots = args$knots[[i]]$knots, boundary.knots = args$knots[[i]]$boundary.knots, : Some 'x' values are
-    ## beyond 'boundary.knots'; Linear extrapolation used.
+    ## Warning in bsplines(mf[[i]], knots = args$knots[[i]]$knots, boundary.knots =
+    ## args$knots[[i]]$boundary.knots, : Some 'x' values are beyond 'boundary.knots';
+    ## Linear extrapolation used.
 
 ``` r
 summary(eml$learner.model$super.model$learner.model)
@@ -501,8 +550,9 @@ variance derived simply as a standard deviation of learners:
 newdata$y.eml = predict(eml, newdata = newdata)$data$response
 ```
 
-    ## Warning in bsplines(mf[[i]], knots = args$knots[[i]]$knots, boundary.knots = args$knots[[i]]$boundary.knots, : Some 'x' values are
-    ## beyond 'boundary.knots'; Linear extrapolation used.
+    ## Warning in bsplines(mf[[i]], knots = args$knots[[i]]$knots, boundary.knots =
+    ## args$knots[[i]]$boundary.knots, : Some 'x' values are beyond 'boundary.knots';
+    ## Linear extrapolation used.
 
 ``` r
 m.train = eml$learner.model$super.model$learner.model$model
@@ -527,8 +577,9 @@ Next, we can predict values and prediction errors at all new locations:
 pred = mlr::getStackedBaseLearnerPredictions(eml, newdata=data.frame(x = -100:200))
 ```
 
-    ## Warning in bsplines(mf[[i]], knots = args$knots[[i]]$knots, boundary.knots = args$knots[[i]]$boundary.knots, : Some 'x' values are
-    ## beyond 'boundary.knots'; Linear extrapolation used.
+    ## Warning in bsplines(mf[[i]], knots = args$knots[[i]]$knots, boundary.knots =
+    ## args$knots[[i]]$boundary.knots, : Some 'x' values are beyond 'boundary.knots';
+    ## Linear extrapolation used.
 
 ``` r
 rf.sd = sqrt(matrixStats::rowSds(as.matrix(as.data.frame(pred)), na.rm=TRUE)^2 * eml.cf)
@@ -573,13 +624,70 @@ than random forest or similar.
 
 One simple approach to interpolate values from point data using e.g.
 Random Forest is to use buffer distances to all points as covariates. We
-use the meuse dataset for testing:
+use the meuse dataset for testing ([Hengl, Nussbaum, Wright, Heuvelink,
+& Gräler, 2018](#ref-hengl2018random)):
 
 ``` r
 library(rgdal)
+```
+
+    ## Loading required package: sp
+
+    ## rgdal: version: 1.5-18, (SVN revision (unknown))
+    ## Geospatial Data Abstraction Library extensions to R successfully loaded
+    ## Loaded GDAL runtime: GDAL 3.0.4, released 2020/01/28
+    ## Path to GDAL shared files: /usr/share/gdal
+    ## GDAL binary built with GEOS: TRUE 
+    ## Loaded PROJ runtime: Rel. 7.0.0, March 1st, 2020, [PJ_VERSION: 700]
+    ## Path to PROJ shared files: /home/tomislav/.local/share/proj:/usr/share/proj
+    ## PROJ CDN enabled: FALSE
+    ## Linking to sp version:1.4-4
+    ## To mute warnings of possible GDAL/OSR exportToProj4() degradation,
+    ## use options("rgdal_show_exportToProj4_warnings"="none") before loading rgdal.
+
+``` r
 library(ranger)
+```
+
+    ## 
+    ## Attaching package: 'ranger'
+
+    ## The following object is masked from 'package:randomForest':
+    ## 
+    ##     importance
+
+``` r
 library(raster)
+```
+
+    ## 
+    ## Attaching package: 'raster'
+
+    ## The following objects are masked from 'package:mboost':
+    ## 
+    ##     cv, extract
+
+    ## The following objects are masked from 'package:kernlab':
+    ## 
+    ##     buffer, rotated
+
+    ## The following object is masked from 'package:mlr':
+    ## 
+    ##     resample
+
+    ## The following object is masked from 'package:ParamHelpers':
+    ## 
+    ##     getValues
+
+``` r
 library(plotKML)
+```
+
+    ## plotKML version 0.8-0 (2021-04-12)
+
+    ## URL: https://github.com/Envirometrix/plotKML/
+
+``` r
 demo(meuse, echo=FALSE)
 grid.dist0 <- landmap::buffer.dist(meuse["zinc"], meuse.grid[1], as.factor(1:nrow(meuse)))
 ```
@@ -632,19 +740,31 @@ Values of Zinc predicted using only RF on buffer distances.
 </div>
 
 This method is obviously not suitable for very large point datasets.
-@sekulic2020random describe an alternative, more scalable method that
-uses closest neighbors (and their values) as covariates to predict
-target variable. This can be implemented using the `meteo` package:
+[Sekulić, Kilibarda, Heuvelink, Nikolić, &
+Bajat](#ref-sekulic2020random) ([2020](#ref-sekulic2020random)) describe
+an alternative, more scalable method that uses closest neighbors (and
+their values) as covariates to predict target variable. This can be
+implemented using the `meteo` package:
 
 ``` r
 library(meteo)
+```
+
+    ## Warning: replacing previous import 'caret::MAE' by 'DescTools::MAE' when loading
+    ## 'meteo'
+
+    ## Warning: replacing previous import 'caret::RMSE' by 'DescTools::RMSE' when
+    ## loading 'meteo'
+
+``` r
 nearest_obs <- meteo::near.obs(locations = meuse.grid, 
                                locations.x.y = c("x","y"), 
                                observations = meuse, observations.x.y=c("x","y"), 
                                zcol = "zinc", n.obs = 10, rm.dupl = TRUE)
 ```
 
-    ## Warning in if (class(knn1$nn.idx) != "integer") {: the condition has length > 1 and only the first element will be used
+    ## Warning in if (class(knn1$nn.idx) != "integer") {: the condition has length > 1
+    ## and only the first element will be used
 
 ``` r
 str(nearest_obs)
@@ -704,7 +824,8 @@ nearest_obs.dev <- meteo::near.obs(locations = meuse,
                                    zcol = "zinc", n.obs = 10, rm.dupl = TRUE)
 ```
 
-    ## Warning in if (class(knn1$nn.idx) != "integer") {: the condition has length > 1 and only the first element will be used
+    ## Warning in if (class(knn1$nn.idx) != "integer") {: the condition has length > 1
+    ## and only the first element will be used
 
 ``` r
 meuse@data <- cbind(meuse@data, nearest_obs.dev)
@@ -767,9 +888,11 @@ Values of first neighbor for meuse dataset.
 ```
 
 Predictions using nearest neighbors shows quite different patterns than
-predictions based on buffer distances. The method by @sekulic2020random
-is nevertheless more interest for general applications as it could be
-also added to spatiotemporal data problems.
+predictions based on buffer distances. The method by [Sekulić,
+Kilibarda, Heuvelink, Nikolić, & Bajat](#ref-sekulic2020random)
+([2020](#ref-sekulic2020random)) is nevertheless more interest for
+general applications as it could be also added to spatiotemporal data
+problems.
 
 ## Spatiotemporal Ensemble ML in R
 
@@ -796,9 +919,10 @@ data("cookfarm")
 
 This dataset contains spatio-temporal (3D+T) measurements of three soil
 properties and a number of spatial and temporal regression covariates.
-It is described in detail in @gasch2015spatio. In this example we fit a
-spatiotemporal model to predict soil moisture, soil temperature and
-electrical conductivity in 3D+T.
+It is described in detail in [Gasch et al.](#ref-gasch2015spatio)
+([2015](#ref-gasch2015spatio)). In this example we fit a spatiotemporal
+model to predict soil moisture, soil temperature and electrical
+conductivity in 3D+T.
 
 We can load the prediction locations and regression-matrix from:
 
@@ -845,17 +969,17 @@ m.vw
     ## R squared (OOB):                  0.8480396
 
 which shows that a significant model can be fitting using this data with
-R-square above 0.80. This model, however, as shown in @gasch2015spatio
-unfortunately ignores the fact that many `VW` measurements have exactly
-the same location, hence it over-fitts data and gives unrealistic
-R-square.
+R-square above 0.80. This model, however, as shown in [Gasch et
+al.](#ref-gasch2015spatio) ([2015](#ref-gasch2015spatio)) unfortunately
+ignores the fact that many `VW` measurements have exactly the same
+location, hence it over-fitts data and gives unrealistic R-square.
 
 We can now fit an Ensemble ML model, but we will also use a **blocking
 parameter** that should protect from over-fitting: the unique code of
 the station (`SOURCEID`). This means that complete stations will be
 either used for training or for validation. This satisfies the
-requirement of @Roberts2017 to predicting to new data or predictor
-space.
+requirement of [Roberts et al.](#ref-Roberts2017)
+([2017](#ref-Roberts2017)) to predicting to new data or predictor space.
 
 We use the same procedure in `mlr` as in the previous example:
 
@@ -955,14 +1079,17 @@ new.st = plyr::join(new.st, cookfarm$weather, type="left")
 pr.df = predict(eml.VW, newdata = new.st[,all.vars(fm)[-1]])
 ```
 
-    ## Warning in bsplines(mf[[i]], knots = args$knots[[i]]$knots, boundary.knots = args$knots[[i]]$boundary.knots, : Some 'x' values are
-    ## beyond 'boundary.knots'; Linear extrapolation used.
+    ## Warning in bsplines(mf[[i]], knots = args$knots[[i]]$knots, boundary.knots =
+    ## args$knots[[i]]$boundary.knots, : Some 'x' values are beyond 'boundary.knots';
+    ## Linear extrapolation used.
 
-    ## Warning in bsplines(mf[[i]], knots = args$knots[[i]]$knots, boundary.knots = args$knots[[i]]$boundary.knots, : Some 'x' values are
-    ## beyond 'boundary.knots'; Linear extrapolation used.
+    ## Warning in bsplines(mf[[i]], knots = args$knots[[i]]$knots, boundary.knots =
+    ## args$knots[[i]]$boundary.knots, : Some 'x' values are beyond 'boundary.knots';
+    ## Linear extrapolation used.
 
-    ## Warning in bsplines(mf[[i]], knots = args$knots[[i]]$knots, boundary.knots = args$knots[[i]]$boundary.knots, : Some 'x' values are
-    ## beyond 'boundary.knots'; Linear extrapolation used.
+    ## Warning in bsplines(mf[[i]], knots = args$knots[[i]]$knots, boundary.knots =
+    ## args$knots[[i]]$boundary.knots, : Some 'x' values are beyond 'boundary.knots';
+    ## Linear extrapolation used.
 
 To plot prediction together with locations of training points we can
 use:
@@ -1002,6 +1129,16 @@ We can load a snapshot of data by using:
 
 ``` r
 library(data.table)
+```
+
+    ## 
+    ## Attaching package: 'data.table'
+
+    ## The following object is masked from 'package:raster':
+    ## 
+    ##     shift
+
+``` r
 library(mlr)
 library(sp)
 fs.rm = readRDS('input/fagus_sylvatica_st.rds')
@@ -1156,6 +1293,24 @@ landsat images, which is expected:
 
 ``` r
 library(ggplot2)
+```
+
+    ## 
+    ## Attaching package: 'ggplot2'
+
+    ## The following object is masked from 'package:mboost':
+    ## 
+    ##     %+%
+
+    ## The following object is masked from 'package:kernlab':
+    ## 
+    ##     alpha
+
+    ## The following object is masked from 'package:randomForest':
+    ## 
+    ##     margin
+
+``` r
 xl <- as.data.frame(mlr::getFeatureImportance(eml.fs[["learner.model"]][["base.models"]][[1]])$res)
 xl$relative_importance = 100*xl$importance/sum(xl$importance)
 xl = xl[order(xl$relative_importance, decreasing = T),]
@@ -1181,13 +1336,15 @@ m1 = predict_tiles(input = "9690.2015",  model = eml.fs)
 
     ## [1] "9690 - reading the data"
 
-    ## Warning in dir.create(tmp_folder, recursive = TRUE): 'output//9690' already exists
+    ## Warning in dir.create(tmp_folder, recursive = TRUE): 'output//9690' already
+    ## exists
 
     ## Tile 9690 already exists, check date...TRUE
 
     ## [1] "9690 - running predictions"
 
-    ## Warning in if (class(probability_map) == "try-error") {: the condition has length > 1 and only the first element will be used
+    ## Warning in if (class(probability_map) == "try-error") {: the condition has
+    ## length > 1 and only the first element will be used
 
     ## [1] "9690 - writing files"
 
@@ -1197,13 +1354,15 @@ m2 = predict_tiles(input = "9690.2017",  model = eml.fs)
 
     ## [1] "9690 - reading the data"
 
-    ## Warning in dir.create(tmp_folder, recursive = TRUE): 'output//9690' already exists
+    ## Warning in dir.create(tmp_folder, recursive = TRUE): 'output//9690' already
+    ## exists
 
     ## Tile 9690 already exists, check date...TRUE
 
     ## [1] "9690 - running predictions"
 
-    ## Warning in if (class(probability_map) == "try-error") {: the condition has length > 1 and only the first element will be used
+    ## Warning in if (class(probability_map) == "try-error") {: the condition has
+    ## length > 1 and only the first element will be used
 
     ## [1] "9690 - writing files"
 
@@ -1213,13 +1372,15 @@ m3 = predict_tiles(input = "9690.2019",  model = eml.fs)
 
     ## [1] "9690 - reading the data"
 
-    ## Warning in dir.create(tmp_folder, recursive = TRUE): 'output//9690' already exists
+    ## Warning in dir.create(tmp_folder, recursive = TRUE): 'output//9690' already
+    ## exists
 
     ## Tile 9690 already exists, check date...TRUE
 
     ## [1] "9690 - running predictions"
 
-    ## Warning in if (class(probability_map) == "try-error") {: the condition has length > 1 and only the first element will be used
+    ## Warning in if (class(probability_map) == "try-error") {: the condition has
+    ## length > 1 and only the first element will be used
 
     ## [1] "9690 - writing files"
 
@@ -1310,11 +1471,152 @@ learners plus the meta-learner, so it often becomes difficult to
 track-back individual relationship between variables. To decrease such
 problems we recommend studying the [Interpretable Machine
 Learning](https://christophm.github.io/interpretable-ml-book/) methods
-\[@molnar2020interpretable\] and running additional diagnostics, and
-intensively plotting of the data in space and spacetime .
+([Molnar, 2020](#ref-molnar2020interpretable)) and running additional
+diagnostics, and intensively plotting of the data in space and spacetime
+.
 
 Note that the `mlr` package is discontinued, so some of the example
 above might become unstable with time. You are advised instead to use
 the new [mlr3 package](https://mlr3.mlr-org.com/).
 
 ## References
+
+<div id="refs" class="references csl-bib-body hanging-indent"
+line-spacing="2">
+
+<div id="ref-bischl2016mlr" class="csl-entry">
+
+Bischl, B., Lang, M., Kotthoff, L., Schiffner, J., Richter, J.,
+Studerus, E., … Jones, Z. M. (2016). <span class="nocase">mlr: Machine
+Learning in R</span>. *The Journal of Machine Learning Research*,
+*17*(1), 5938–5942.
+
+</div>
+
+<div id="ref-erwig1999spatio" class="csl-entry">
+
+Erwig, M., Gu, R. H., Schneider, M., Vazirgiannis, M., & others. (1999).
+Spatio-temporal data types: An approach to modeling and querying moving
+objects in databases. *GeoInformatica*, *3*(3), 269–296.
+
+</div>
+
+<div id="ref-gasch2015spatio" class="csl-entry">
+
+Gasch, C. K., Hengl, T., Gräler, B., Meyer, H., Magney, T. S., & Brown,
+D. J. (2015). Spatio-temporal interpolation of soil water, temperature,
+and electrical conductivity in 3D+ t: The cook agronomy farm data set.
+*Spatial Statistics*, *14*, 70–90.
+doi:[10.1016/j.spasta.2015.04.001](https://doi.org/10.1016/j.spasta.2015.04.001)
+
+</div>
+
+<div id="ref-hengl2012spatio" class="csl-entry">
+
+Hengl, T., Heuvelink, G. B., Tadić, M. P., & Pebesma, E. J. (2012).
+Spatio-temporal prediction of daily temperatures using time-series of
+MODIS LST images. *Theoretical and Applied Climatology*, *107*(1),
+265–277.
+
+</div>
+
+<div id="ref-hengl2018random" class="csl-entry">
+
+Hengl, T., Nussbaum, M., Wright, M. N., Heuvelink, G. B., & Gräler, B.
+(2018). Random forest as a generic framework for predictive modeling of
+spatial and spatio-temporal variables. *PeerJ*, *6*, e5518.
+
+</div>
+
+<div id="ref-hengl2015plotkml" class="csl-entry">
+
+Hengl, T., Roudier, P., Beaudette, D., Pebesma, E., & others. (2015).
+plotKML: Scientific visualization of spatio-temporal data. *Journal of
+Statistical Software*, *63*(5), 1–25. Retrieved from
+<https://www.jstatsoft.org/article/view/v063i05>
+
+</div>
+
+<div id="ref-kilibarda2014spatio" class="csl-entry">
+
+Kilibarda, Milan, Hengl, T., Heuvelink, G. B., Gräler, B., Pebesma, E.,
+Perčec Tadić, M., & Bajat, B. (2014). Spatio-temporal interpolation of
+daily temperatures for global land areas at 1 km resolution. *Journal of
+Geophysical Research: Atmospheres*, *119*(5), 2294–2313.
+doi:[10.1002/2013JD020803](https://doi.org/10.1002/2013JD020803)
+
+</div>
+
+<div id="ref-KilibardaProtic2019" class="csl-entry">
+
+Kilibarda, M., & Protić, D. (2019). *Introduction to geovisualization
+and web cartography* (p. 184). Belgrade, Serbia: University of Belgrade,
+Faculty of Civil Engineering.
+
+</div>
+
+<div id="ref-lamigueiro2014displaying" class="csl-entry">
+
+Lamigueiro, O. P. (2014). *Displaying time series, spatial, and
+space-time data with r*. CRC Press.
+
+</div>
+
+<div id="ref-lu2021unified" class="csl-entry">
+
+Lu, B., & Hardin, J. (2021). A unified framework for random forest
+prediction error estimation. *Journal of Machine Learning Research*,
+*22*(8), 1–41.
+
+</div>
+
+<div id="ref-Marcott1198" class="csl-entry">
+
+Marcott, S. A., Shakun, J. D., Clark, P. U., & Mix, A. C. (2013). A
+reconstruction of regional and global temperature for the past 11,300
+years. *Science*, *339*(6124), 1198–1201.
+doi:[10.1126/science.1228026](https://doi.org/10.1126/science.1228026)
+
+</div>
+
+<div id="ref-meyerPebesma2020" class="csl-entry">
+
+Meyer, H., & Pebesma, E. (2020). Predicting into unknown space?
+Estimating the area of applicability of spatial prediction models.
+*Methods in Ecology and Evolution*, *n/a*(n/a).
+doi:[10.1111/2041-210X.13650](https://doi.org/10.1111/2041-210X.13650)
+
+</div>
+
+<div id="ref-molnar2020interpretable" class="csl-entry">
+
+Molnar, C. (2020). *Interpretable machine learning*. Lulu.com.
+
+</div>
+
+<div id="ref-Roberts2017" class="csl-entry">
+
+Roberts, D. R., Bahn, V., Ciuti, S., Boyce, M. S., Elith, J.,
+Guillera-Arroita, G., … Dormann, C. F. (2017). Cross-validation
+strategies for data with temporal, spatial, hierarchical, or
+phylogenetic structure. *Ecography*, *40*(8), 913–929.
+doi:[10.1111/ecog.02881](https://doi.org/10.1111/ecog.02881)
+
+</div>
+
+<div id="ref-sekulic2020random" class="csl-entry">
+
+Sekulić, A., Kilibarda, M., Heuvelink, G., Nikolić, M., & Bajat, B.
+(2020). Random forest spatial interpolation. *Remote Sensing*, *12*(10),
+1687.
+
+</div>
+
+<div id="ref-wikle2019spatio" class="csl-entry">
+
+Wikle, C. K., Zammit-Mangion, A., & Cressie, N. (2019). *Spatio-temporal
+statistics with r*. CRC Press.
+
+</div>
+
+</div>

@@ -31,7 +31,7 @@ ls <- c("rgdal", "raster", "plotKML", "ranger", "mlr", "geoR", "parallelMap",
         "xgboost", "terra", "glmnet", "matrixStats", "kernlab", "deepnet", "landmap")
 new.packages <- ls[!(ls %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
-#options(warn=-1)
+options(warn=-1)
 #load("eml_data.RData")
 ```
 
@@ -54,7 +54,7 @@ station. This would have the following coordinates:
 Analysis of spatiotemporal data is somewhat different from pure spatial
 analysis. Time is not only 3rd dimension i.e. it has specific
 
-For ERWIG et al. (1999) spatio-temporal data sets and corresponding
+For @erwig1999spatio spatio-temporal data sets and corresponding
 databases can be matched with the two major groups of features: (1)
 **moving or dynamic objects** (discrete or vector geometries), and (2)
 **regions** (fields or continuous features). Distinct objects (entities)
@@ -68,14 +68,14 @@ fields, we basically map either:
 -   probability of occurrence of some feature or object,
 
 Spatiotemporal data can be best visualize using space-time cubes. One
-example of a spacetime cube is the following plot [\@hengl2012spatio]:
+example of a spacetime cube is the following plot [@hengl2012spatio]:
 
 <img src="img/Fig_space_time_cube.png" width="750"/>
 
 *Figure: Space-time cube visualized in R: (a) cloud plot showing
 location of meteorological stations in Croatia, (b) illustration of
 spatial and temporal support in the space-time cube
-[\@hengl2012spatio].*
+[@hengl2012spatio].*
 
 This shows distribution of meteorological stations over Croatia, and
 then repeated measurements through time. The spatial and temporal
@@ -106,7 +106,7 @@ interglacials](https://en.wikipedia.org/wiki/Ice_age)):
 <img src="img/Fig_global_mean_temp_longterm_trend.png" width="750"/>
 
 *Figure: Global temperature reconstruction from proxy data of
-\@Marcott1198. This shows how global temperature varies on long-term
+@Marcott1198. This shows how global temperature varies on long-term
 term. Graph by: Klaus Bitterman.*
 
 Seasonal and daily components of variation of land surface temperature
@@ -115,13 +115,13 @@ a relatively deterministic part of variation as Earth's rotation is
 relatively stable hence the patterns produced are distinct (periodic
 sinusoidal curves or similar). The plot below shows variation of values
 of soil moisture and soil temperature at one meteo station in USA
-[\@gasch2015spatio]:
+[@gasch2015spatio]:
 
 <img src="img/Fig_cookfarm_plots_seasonality.png" width="750"/>
 
 *Figure: Sensor values from five depths (0.3, 0.6, 0.9, 1.2, and 1.5 m)
 at one station at Cook Agronomy Farm from January 2011–January 2014. The
-black line indicates locally fitted splines [\@gasch2015spatio].*
+black line indicates locally fitted splines [@gasch2015spatio].*
 
 As we will see later, the seasonal part of variation can be modeling
 using latitude, altitude and time/day of the year.
@@ -138,7 +138,7 @@ Spatial data is usually visualized using static or interactive maps (see
 e.g. [mapview](https://r-spatial.github.io/mapview/) and/or [tmap
 package](https://cran.r-project.org/web/packages/tmap/vignettes/tmap-getstarted.html)).
 Spatiotemporal data (2D+T) is more complex to visualize, while 3D+T data
-can even require some expertise in the field [\@hengl2015plotkml] before
+can even require some expertise in the field [@hengl2015plotkml] before
 user can make any seamless interpretation.
 
 There are three possible groups of ways to visualize spatiotemporal
@@ -152,14 +152,14 @@ data:
     allowing users to choose *speed* and *direction* of animation.
 
 For an introduction to visualizying spatiotemporal and time-series data
-is \@lamigueiro2014displaying. More complex visualization of
+is @lamigueiro2014displaying. More complex visualization of
 spatiotemporal / dynamic features is possible by using the
 <https://geemap.org/> package (*A Python package for interactive mapping
 with Google Earth Engine, ipyleaflet, and ipywidgets*). OpenLandMap.org
 has multiple temporal datasets and users can interactive with
 time-dimension by using the time-slider implemented in [OpenLayers +
 Geoserver](http://osgl.grf.bg.ac.rs/books/gvvk-en/)
-[\@KilibardaProtic2019].
+[@KilibardaProtic2019].
 
 <img src="img/Fig_HILDA_visualization_landcover.gif" width="750"/>
 
@@ -184,14 +184,14 @@ find relationship between the target variable and some EO data
 resolution.
 
 For more in-depth discussion on spatitemporal data in R please refer to
-\@wikle2019spatio. For in-depth discussion on spatial and spatiotemporal
+@wikle2019spatio. For in-depth discussion on spatial and spatiotemporal
 blocking for purpose of modeling building and cross-validation refer to
-\@Roberts2017.
+@Roberts2017.
 
 #### Modeling seasonal components
 
 The seasonal component of variation is determined by Earth's rotation
-and Sun's angle. \@kilibarda2014spatio have shown that the seasonal
+and Sun's angle. @kilibarda2014spatio have shown that the seasonal
 component e.g. geometric Earth surface minimum and maximum temperature,
 which can be modeled universally anywhere on globe by using the
 following formula:
@@ -306,7 +306,7 @@ rf
 ```
 
 Next, we can estimate the prediction errors using the method of
-\@lu2021unified, which is available via the `forestError` package:
+@lu2021unified, which is available via the `forestError` package:
 
 ```{r}
 library(forestError)
@@ -360,13 +360,13 @@ result in decision makers being over-confident, leading to wrong
 decisions, and consequently making users losing any confidence in RF.
 For an in-depth discussion on extrapolation problems and *Area of
 Applicability* of Machine Learning models please refer to
-\@meyerPebesma2020.
+@meyerPebesma2020.
 
 A possible solution to the problem above is to, instead of using only
 one learners, we use multiple learners and then apply robust
 cross-validation that prevents the target model from over-fitting. This
 can be implemented efficiently by using the `mlr` package for example
-\@bischl2016mlr. We can run an Ensemble Model by applying the following
+@bischl2016mlr. We can run an Ensemble Model by applying the following
 four steps. First, we define the task of interest and a combination of
 learners:
 
@@ -461,7 +461,7 @@ than random forest or similar.
 
 One simple approach to interpolate values from point data using e.g.
 Random Forest is to use buffer distances to all points as covariates. We
-use the meuse dataset for testing:
+use the meuse dataset for testing [@hengl2018random]:
 
 ```{r}
 library(rgdal)
@@ -495,7 +495,7 @@ points(meuse, pch="+")
 ```
 
 This method is obviously not suitable for very large point datasets.
-\@sekulic2020random describe an alternative, more scalable method that
+@sekulic2020random describe an alternative, more scalable method that
 uses closest neighbors (and their values) as covariates to predict
 target variable. This can be implemented using the `meteo` package:
 
@@ -554,7 +554,7 @@ points(meuse, pch="+")
 ```
 
 Predictions using nearest neighbors shows quite different patterns than
-predictions based on buffer distances. The method by \@sekulic2020random
+predictions based on buffer distances. The method by @sekulic2020random
 is nevertheless more interest for general applications as it could be
 also added to spatiotemporal data problems.
 
@@ -583,7 +583,7 @@ data("cookfarm")
 
 This dataset contains spatio-temporal (3D+T) measurements of three soil
 properties and a number of spatial and temporal regression covariates.
-It is described in detail in \@gasch2015spatio. In this example we fit a
+It is described in detail in @gasch2015spatio. In this example we fit a
 spatiotemporal model to predict soil moisture, soil temperature and
 electrical conductivity in 3D+T.
 
@@ -616,7 +616,7 @@ m.vw
 ```
 
 which shows that a significant model can be fitting using this data with
-R-square above 0.80. This model, however, as shown in \@gasch2015spatio
+R-square above 0.80. This model, however, as shown in @gasch2015spatio
 unfortunately ignores the fact that many `VW` measurements have exactly
 the same location, hence it over-fitts data and gives unrealistic
 R-square.
@@ -625,7 +625,7 @@ We can now fit an Ensemble ML model, but we will also use a **blocking
 parameter** that should protect from over-fitting: the unique code of
 the station (`SOURCEID`). This means that complete stations will be
 either used for training or for validation. This satisfies the
-requirement of \@Roberts2017 to predicting to new data or predictor
+requirement of @Roberts2017 to predicting to new data or predictor
 space.
 
 We use the same procedure in `mlr` as in the previous example:
@@ -896,7 +896,7 @@ learners plus the meta-learner, so it often becomes difficult to
 track-back individual relationship between variables. To decrease such
 problems we recommend studying the [Interpretable Machine
 Learning](https://christophm.github.io/interpretable-ml-book/) methods
-[\@molnar2020interpretable] and running additional diagnostics, and
+[@molnar2020interpretable] and running additional diagnostics, and
 intensively plotting of the data in space and spacetime .
 
 Note that the `mlr` package is discontinued, so some of the example
