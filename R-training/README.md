@@ -1,5 +1,5 @@
-Modeling with spatial and spatiatemporal data in R / Spatiotemporal
-Ensemble ML in R
+Modeling with spatial and spatiatemporal data in R / Predictive mapping
+using spatiotemporal Ensemble ML
 ================
 Created and maintained by: Tom Hengl (<tom.hengl@OpenGeoHub.org>) \|
 Leandro L. Parente (<leandro.parente@OpenGeoHub.org>) \| Carmelo
@@ -19,8 +19,8 @@ Last compiled on: 03 September, 2021
 -   [Modeling with spatial and spatiatemporal data in
     R](#modeling-with-spatial-and-spatiatemporal-data-in-r)
     -   [Standard ML steps](#standard-ml-steps)
-    -   [Extrapolation and over-fitting
-        problems](#extrapolation-and-over-fitting-problems)
+    -   [Extrapolation and over-fitting problems of ML
+        methods](#extrapolation-and-over-fitting-problems-of-ml-methods)
     -   [Spatial interpolation using ML and buffer distances to
         points](#spatial-interpolation-using-ml-and-buffer-distances-to-points)
     -   [Spatial interpolation using ML and geographical distances to
@@ -76,11 +76,12 @@ and begin and end time of measurement specified (in this case temporal
 support is 1 day).
 
 Analysis of spatiotemporal data is somewhat different from pure spatial
-analysis. Time is not a spatial dimension i.e. it has specific
-properties and different statistical assumptions and methods have been
-developed for spatio- temporal data than for spatial data. For an
-introduction to spatiotemporal data in R please refer to the `spacetime`
-package tutorial ([Pebesma & others, 2012](#ref-pebesma2012spacetime)).
+analysis. Time is not *just another* spatial dimension i.e. it has
+specific properties and different statistical assumptions and methods
+have been developed for spatio- temporal data than for spatial data. For
+an introduction to spatiotemporal data in R please refer to the
+`spacetime` package tutorial ([Pebesma & others,
+2012](#ref-pebesma2012spacetime)).
 
 For [Erwig, Gu, Schneider, Vazirgiannis, & others](#ref-erwig1999spatio)
 ([1999](#ref-erwig1999spatio)) spatio-temporal data sets and
@@ -96,10 +97,10 @@ In the case of working with fields, we basically map either:
 -   energy flux or any similar physical measurements,
 -   probability of occurrence of some feature or object,
 
-All these can change through time so that time-series of predictions can
-be produced to represent the variable dynamics.
+All these can change through time so that time-series of predictions
+would nee to be produced to represent the variable dynamics.
 
-Spatiotemporal data can be best visualize using space-time cubes. One
+Spatiotemporal data can be best visualized using space-time cubes. One
 example of a spacetime cube is the following plot:
 
 <img src="img/Fig_space_time_cube.png" width="750"/>
@@ -122,7 +123,7 @@ is known as **time-series analysis**. Some systematic guides on how to
 run time-series analysis in R can be found
 [here](http://r-statistics.co/Time-Series-Analysis-With-R.html).
 
-How variables changes through time can often be drastically different
+How variable changes through time can often be drastically different
 from the spatial patterns. In general one can say that, for many
 environmental variables, variation of values can be separated into
 **components** such as:
@@ -200,7 +201,7 @@ with Google Earth Engine, ipyleaflet, and ipywidgets*).
 
 OpenLandMap.org has multiple temporal datasets and users can interactive
 with time-dimension by using the time-slider implemented in [OpenLayers
-+ Geoserver](http://osgl.grf.bg.ac.rs/books/gvvk-en/) ([M. Kilibarda &
+and Geoserver](http://osgl.grf.bg.ac.rs/books/gvvk-en/) ([M. Kilibarda &
 Protić, 2019](#ref-KilibardaProtic2019)).
 
 <img src="img/Fig_HILDA_visualization_landcover.gif" width="750"/>
@@ -213,9 +214,11 @@ in www.OpenLandMap.org.*
 
 Spatiotemporal interpolation and/or prediction implies that point
 samples are used to interpolate within the spacetime cube. This
-obviously assumes that enough point measurements are available spread in
-both space and time. We will show in this tutorial how Machine Learning
-can be used to interpolate values within the spacetime cube.
+obviously assumes that enough point measurements are available and which
+are spread in both space and time. We will show in this tutorial how
+Machine Learning can be used to interpolate values within the spacetime
+cube.
+
 Spatiotemporal interpolation using various kriging methods is
 implemented in the [gstat
 package](https://cran.r-project.org/web/packages/gstat/vignettes/spatio-temporal-kriging.pdf)
@@ -225,7 +228,7 @@ For success of spatiotemporal interpolation (in terms of prediction
 accuracy), the key is to recognize systematic component of variation in
 spacetime, which is usually possible if we find relationship between the
 target variable and some EO data (temporally dynamic) that is available
-possibly at high spatial resolution. Once we establish a significant
+at highest possible spatial resolution. Once we establish a significant
 relation, we can use this to predict anywhere in spacetime cube.
 
 For more in-depth discussion on spatiotemporal data in R please refer to
@@ -242,7 +245,7 @@ in trigonometric functions. Such repeating patterns can happen at
 different time-supports:
 
 -   inter-annually,
--   monthly or based on season,
+-   monthly or based on a season (spring, summer, autumn, winter),
 -   daily,
 -   hourly i.e. day-time and night-time patterns,
 
@@ -272,7 +275,9 @@ southern hemisphere, `elev` is the elevation in meter, 0.6 is the
 vertical temperature gradient per 100\~m, and `sign` denotes the
 *signum* function that extracts the sign of a real number.
 
-A simple example of min daily temperature is:
+This formula accounts for different seasons at southern and northern
+hemisphere and can be basically applied on gridded surfaces to compute
+expected temperature. A simple example of min daily temperature is:
 
 ``` r
 temp.from.geom(fi=52, day=120)
@@ -297,9 +302,6 @@ Geometric temperature function plot.
 
 </div>
 
-In principle, this geometric or seasonal component is inexpensive to
-compute and can be added universally to any spatiotemporal model.
-
 ## Modeling with spatial and spatiatemporal data in R
 
 #### Standard ML steps
@@ -317,7 +319,7 @@ steps:
 5.  Generate predictions and save as maps.
 6.  Visualize predictions using web-GIS solutions.
 
-#### Extrapolation and over-fitting problems
+#### Extrapolation and over-fitting problems of ML methods
 
 Machine Learning techniques such as Random Forest have proven to
 over-perform vs more simple linear statistical methods, especially where
@@ -628,9 +630,10 @@ Difference in model fits for sythetic data: lm vs Ensemble ML.
 
 </div>
 
-From the plot above, prediction error intervals in the extrapolation
-space can be quite wide, and this now reflects much better what we would
-expect than if we have only used the `forestError` package.
+From the plot above, we see that the prediction error intervals in the
+extrapolation space can be quite wide, and this now reflects much better
+what we would expect than if we have only used the `forestError`
+package.
 
 In summary: it appears that combining linear and non-linear tree-based
 models both helps decrease over-fitting and produce more realistic
@@ -897,8 +900,8 @@ Note that predictions using nearest neighbors shows quite different
 patterns than predictions based on buffer distances. The method by
 [Sekulić, Kilibarda, Heuvelink, Nikolić, &
 Bajat](#ref-sekulic2020random) ([2020](#ref-sekulic2020random)) is
-nevertheless more interest for general applications as it could be also
-added to spatiotemporal data problems.
+nevertheless more interesting for general applications as it could be
+also added to spatiotemporal data problems.
 
 ## Spatiotemporal Ensemble ML in R
 
@@ -1530,7 +1533,7 @@ visualize changes using e.g. the `animation` package.
 In the next example we demonstrate how to fit a spatiotemporal model
 using biological data: occurrences of [*Fagus
 sylvatica*](https://www.gbif.org/species/2882316) over Europe. This is
-the domain of Specied Distribution modeling, except in this case we
+the domain of **Specied Distribution modeling**, except in this case we
 model distribution of target species in spacetime. The point data has
 been compiled for the purpose of the OpenDataScience.eu project, then
 cleaned and overlaid vs time-series of Landsat GLAD images and climatic
@@ -1801,8 +1804,8 @@ problems and similar.
 
 Where time-series EO data exists, this can be also incorporated into the
 mapping algorithm. For spacetime overlays we recommend using
-Cloud-Optimized GeoTIFFs and the `terra` package which helps speed up
-overlay.
+Cloud-Optimized GeoTIFFs and the `terra` package ([Hijmans,
+2019](#ref-hijmans2019spatial)) which helps speed-up overlays.
 
 Spatiotemporal datasets can be at the order of magnitude larger, hence
 it is important, when implementing analysis of spatiotemporal data, to
@@ -1835,7 +1838,7 @@ tutorial include:
 Ensemble ML framework we used clearly offers many benefits but it comes
 at a cost of at the order of magnitude higher computational load. Also
 interpretation of such models can be a cumbersome as there a multiple
-learners plus the meta-learner, so it often becomes difficult to
+learners plus a meta-learner, so it often becomes difficult to
 track-back individual relationship between variables. To decrease such
 problems we recommend studying the [Interpretable Machine
 Learning](https://christophm.github.io/interpretable-ml-book/) methods
@@ -1902,6 +1905,14 @@ Hengl, T., Roudier, P., Beaudette, D., Pebesma, E., & others. (2015).
 plotKML: Scientific visualization of spatio-temporal data. *Journal of
 Statistical Software*, *63*(5), 1–25. Retrieved from
 <https://www.jstatsoft.org/article/view/v063i05>
+
+</div>
+
+<div id="ref-hijmans2019spatial" class="csl-entry">
+
+Hijmans, R. J. (2019). Spatial data in r. *United States: GFC for the
+Innovation Lab for Collaborative Research on Sustainable
+Intensification*.
 
 </div>
 
