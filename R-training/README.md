@@ -83,15 +83,15 @@ an introduction to spatiotemporal data in R please refer to the
 `spacetime` package tutorial ([Pebesma & others,
 2012](#ref-pebesma2012spacetime)).
 
-For [Erwig, Gu, Schneider, Vazirgiannis, & others](#ref-erwig1999spatio)
+For [Erwig, Gu, Schneider, & Vazirgiannis](#ref-erwig1999spatio)
 ([1999](#ref-erwig1999spatio)) spatio-temporal data sets and
 corresponding databases can be matched with the two major groups of
 features: (1) **moving or dynamic objects** (discrete or vector
-geometries), and (2) **regions** (fields or continuous features).
-Distinct objects (entities) such as people, animals, vehicles and
-similar are best represented using vectors and trajectories (movement
-through time), and fields can be represented using gridded structures.
-In the case of working with fields, we basically map either:
+geometries), and (2) dynamic **regions** (fields or continuous
+features). Distinct objects (entities) such as people, animals, vehicles
+and similar are best represented using vectors and trajectories
+(movement through time), and fields can be represented using gridded
+structures. In the case of working with fields, we basically map either:
 
 -   quantity or density of some material or chemical element,
 -   energy flux or any similar physical measurements,
@@ -113,7 +113,7 @@ Beaudette, Pebesma, & others, 2015](#ref-hengl2015plotkml)).*
 
 The plot shows distribution of meteorological stations over Croatia, and
 then repeated measurements through time. This dataset is further used in
-the practical use cases examples.
+the use case examples.
 
 #### Time-series analysis
 
@@ -160,7 +160,7 @@ Sun. This is a relatively deterministic part of variation as Earth’s
 rotation is relatively stable hence the patterns produced are distinct
 (periodic sinusoidal curves or similar). The plot below shows variation
 of values of soil moisture and soil temperature at one meteo station in
-USA ([Gasch et al., 2015](#ref-gasch2015spatio)):
+USA ([Gasch et al., 2015](#ref-gasch2015spatio)).
 
 <img src="img/Fig_cookfarm_plots_seasonality.png" width="750"/>
 
@@ -170,7 +170,8 @@ black line indicates locally fitted splines ([Gasch et al.,
 2015](#ref-gasch2015spatio)).*
 
 As we will see later, the seasonal daily and monthly part of variation
-can be modeling using latitude, altitude and time/day of the year.
+is systematic and can be modeling using latitude, altitude and time/day
+of the year.
 
 #### Visualizing spatiotemporal data
 
@@ -909,11 +910,11 @@ also added to spatiotemporal data problems.
 
 Ensemble Machine Learning is an approach to modeling where, instead of
 using a single best learner, we use multiple learners and then combine
-their predictions. This can both lead to higher accuracy and robustness,
-but also helps us determine model-free estimate of prediction errors
-i.e. we can help decrease some methodological disadvantages of
-individual learners as shown in the previous example with synthetic
-data.
+their predictions. This can both lead to higher accuracy and robustness
+([Seni & Elder, 2010](#ref-seni2010ensemble)), but also helps us
+determine model-free estimate of prediction errors i.e. we can help
+decrease some methodological disadvantages of individual learners as
+shown in the previous example with synthetic data.
 
 Ensemble Machine Learning for predictive mapping in 2D and 3D is
 discussed in detail in [this R
@@ -1860,13 +1861,14 @@ line-spacing="2">
 Bischl, B., Lang, M., Kotthoff, L., Schiffner, J., Richter, J.,
 Studerus, E., … Jones, Z. M. (2016). <span class="nocase">mlr: Machine
 Learning in R</span>. *The Journal of Machine Learning Research*,
-*17*(1), 5938–5942.
+*17*(1), 5938–5942. Retrieved from
+<https://jmlr.org/papers/v17/15-066.html>
 
 </div>
 
 <div id="ref-erwig1999spatio" class="csl-entry">
 
-Erwig, M., Gu, R. H., Schneider, M., Vazirgiannis, M., & others. (1999).
+Erwig, M., Gu, R. H., Schneider, M., & Vazirgiannis, M. (1999).
 Spatio-temporal data types: An approach to modeling and querying moving
 objects in databases. *GeoInformatica*, *3*(3), 269–296.
 
@@ -1875,9 +1877,9 @@ objects in databases. *GeoInformatica*, *3*(3), 269–296.
 <div id="ref-gasch2015spatio" class="csl-entry">
 
 Gasch, C. K., Hengl, T., Gräler, B., Meyer, H., Magney, T. S., & Brown,
-D. J. (2015). Spatio-temporal interpolation of soil water, temperature,
-and electrical conductivity in 3D+ t: The cook agronomy farm data set.
-*Spatial Statistics*, *14*, 70–90.
+D. J. (2015). <span class="nocase">Spatio-temporal interpolation of soil
+water, temperature, and electrical conductivity in 3D+ T: The Cook
+Agronomy Farm data set</span>. *Spatial Statistics*, *14*, 70–90.
 doi:[10.1016/j.spasta.2015.04.001](https://doi.org/10.1016/j.spasta.2015.04.001)
 
 </div>
@@ -1885,9 +1887,10 @@ doi:[10.1016/j.spasta.2015.04.001](https://doi.org/10.1016/j.spasta.2015.04.001)
 <div id="ref-hengl2012spatio" class="csl-entry">
 
 Hengl, T., Heuvelink, G. B., Tadić, M. P., & Pebesma, E. J. (2012).
-Spatio-temporal prediction of daily temperatures using time-series of
-MODIS LST images. *Theoretical and Applied Climatology*, *107*(1),
-265–277.
+<span class="nocase">Spatio-temporal prediction of daily temperatures
+using time-series of MODIS LST images</span>. *Theoretical and Applied
+Climatology*, *107*(1), 265–277.
+doi:[10.1007/s00704-011-0464-2](https://doi.org/10.1007/s00704-011-0464-2)
 
 </div>
 
@@ -1896,23 +1899,24 @@ MODIS LST images. *Theoretical and Applied Climatology*, *107*(1),
 Hengl, T., Nussbaum, M., Wright, M. N., Heuvelink, G. B., & Gräler, B.
 (2018). Random forest as a generic framework for predictive modeling of
 spatial and spatio-temporal variables. *PeerJ*, *6*, e5518.
+doi:[10.7717/peerj.5518](https://doi.org/10.7717/peerj.5518)
 
 </div>
 
 <div id="ref-hengl2015plotkml" class="csl-entry">
 
 Hengl, T., Roudier, P., Beaudette, D., Pebesma, E., & others. (2015).
-plotKML: Scientific visualization of spatio-temporal data. *Journal of
-Statistical Software*, *63*(5), 1–25. Retrieved from
-<https://www.jstatsoft.org/article/view/v063i05>
+<span class="nocase">plotKML: Scientific visualization of
+spatio-temporal data</span>. *Journal of Statistical Software*, *63*(5),
+1–25. Retrieved from <https://www.jstatsoft.org/article/view/v063i05>
 
 </div>
 
 <div id="ref-hijmans2019spatial" class="csl-entry">
 
-Hijmans, R. J. (2019). Spatial data in r. *United States: GFC for the
-Innovation Lab for Collaborative Research on Sustainable
-Intensification*.
+Hijmans, R. J. (2019). <span class="nocase">Spatial data in R</span>.
+*United States: GFC for the Innovation Lab for Collaborative Research on
+Sustainable Intensification*. Retrieved from <https://rspatial.org/>
 
 </div>
 
@@ -1928,16 +1932,17 @@ doi:[10.1002/2013JD020803](https://doi.org/10.1002/2013JD020803)
 
 <div id="ref-KilibardaProtic2019" class="csl-entry">
 
-Kilibarda, M., & Protić, D. (2019). *Introduction to geovisualization
-and web cartography* (p. 184). Belgrade, Serbia: University of Belgrade,
-Faculty of Civil Engineering.
+Kilibarda, M., & Protić, D. (2019). *<span class="nocase">Introduction
+to geovisualization and web cartography</span>* (p. 184). Belgrade,
+Serbia: University of Belgrade, Faculty of Civil Engineering. Retrieved
+from <http://osgl.grf.bg.ac.rs/books/gvvk-en/>
 
 </div>
 
 <div id="ref-lamigueiro2014displaying" class="csl-entry">
 
-Lamigueiro, O. P. (2014). *Displaying time series, spatial, and
-space-time data with r*. CRC Press.
+Lamigueiro, O. P. (2014). *<span class="nocase">Displaying Time Series,
+Spatial, and Space-Time Data with R</span>*. CRC Press.
 
 </div>
 
@@ -1945,7 +1950,7 @@ space-time data with r*. CRC Press.
 
 Lu, B., & Hardin, J. (2021). A unified framework for random forest
 prediction error estimation. *Journal of Machine Learning Research*,
-*22*(8), 1–41.
+*22*(8), 1–41. Retrieved from <https://jmlr.org/papers/v22/18-558.html>
 
 </div>
 
@@ -1960,23 +1965,26 @@ doi:[10.1126/science.1228026](https://doi.org/10.1126/science.1228026)
 
 <div id="ref-meyerPebesma2020" class="csl-entry">
 
-Meyer, H., & Pebesma, E. (2020). Predicting into unknown space?
-Estimating the area of applicability of spatial prediction models.
-*Methods in Ecology and Evolution*, *n/a*(n/a).
+Meyer, H., & Pebesma, E. (2020). <span class="nocase">Predicting into
+unknown space? Estimating the area of applicability of spatial
+prediction models</span>. *Methods in Ecology and Evolution*,
+*n/a*(n/a).
 doi:[10.1111/2041-210X.13650](https://doi.org/10.1111/2041-210X.13650)
 
 </div>
 
 <div id="ref-molnar2020interpretable" class="csl-entry">
 
-Molnar, C. (2020). *Interpretable machine learning*. Lulu.com.
+Molnar, C. (2020). *Interpretable Machine Learning*. Lulu.com. Retrieved
+from <https://christophm.github.io/interpretable-ml-book/>
 
 </div>
 
 <div id="ref-pebesma2012spacetime" class="csl-entry">
 
-Pebesma, E., & others. (2012). Spacetime: Spatio-temporal data in r.
-*Journal of Statistical Software*, *51*(7), 1–30. Retrieved from
+Pebesma, E., & others. (2012). <span class="nocase">spacetime:
+Spatio-temporal data in R</span>. *Journal of Statistical Software*,
+*51*(7), 1–30. Retrieved from
 <https://www.jstatsoft.org/article/view/v051i07>
 
 </div>
@@ -1994,15 +2002,23 @@ doi:[10.1111/ecog.02881](https://doi.org/10.1111/ecog.02881)
 <div id="ref-sekulic2020random" class="csl-entry">
 
 Sekulić, A., Kilibarda, M., Heuvelink, G., Nikolić, M., & Bajat, B.
-(2020). Random forest spatial interpolation. *Remote Sensing*, *12*(10),
-1687.
+(2020). Random Forest Spatial Interpolation. *Remote Sensing*, *12*(10),
+1687. doi:[10.3390/rs12101687](https://doi.org/10.3390/rs12101687)
+
+</div>
+
+<div id="ref-seni2010ensemble" class="csl-entry">
+
+Seni, G., & Elder, J. F. (2010). *<span class="nocase">Ensemble Methods
+in Data Mining: Improving Accuracy Through Combining
+Predictions</span>*. Morgan & Claypool Publishers.
 
 </div>
 
 <div id="ref-wikle2019spatio" class="csl-entry">
 
-Wikle, C. K., Zammit-Mangion, A., & Cressie, N. (2019). *Spatio-temporal
-statistics with r*. CRC Press.
+Wikle, C. K., Zammit-Mangion, A., & Cressie, N. (2019). *<span
+class="nocase">Spatio-Temporal Statistics with R</span>*. CRC Press.
 
 </div>
 

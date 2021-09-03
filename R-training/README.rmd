@@ -74,7 +74,7 @@ data in R please refer to the `spacetime` package tutorial [@pebesma2012spacetim
 For @erwig1999spatio spatio-temporal data sets and corresponding 
 databases can be matched with the two major groups of features: (1) 
 **moving or dynamic objects** (discrete or vector geometries), and (2) 
-**regions** (fields or continuous features). Distinct objects (entities) 
+dynamic **regions** (fields or continuous features). Distinct objects (entities) 
 such as people, animals, vehicles and similar are best represented using 
 vectors and trajectories (movement through time), and fields can be 
 represented using gridded structures. In the case of working with 
@@ -99,7 +99,7 @@ spatial and temporal support in the space-time cube
 
 The plot shows distribution of meteorological stations over Croatia, and 
 then repeated measurements through time. This dataset is further used in the 
-practical use cases examples.
+use case examples.
 
 
 #### Time-series analysis
@@ -144,7 +144,7 @@ a relatively deterministic part of variation as Earth's rotation is
 relatively stable hence the patterns produced are distinct (periodic
 sinusoidal curves or similar). The plot below shows variation of values
 of soil moisture and soil temperature at one meteo station in USA
-[@gasch2015spatio]:
+[@gasch2015spatio].
 
 <img src="img/Fig_cookfarm_plots_seasonality.png" width="750"/>
 
@@ -152,8 +152,8 @@ of soil moisture and soil temperature at one meteo station in USA
 at one station at Cook Agronomy Farm from January 2011–January 2014. The
 black line indicates locally fitted splines [@gasch2015spatio].*
 
-As we will see later, the seasonal daily and monthly part of variation can 
-be modeling using latitude, altitude and time/day of the year. 
+As we will see later, the seasonal daily and monthly part of variation 
+is systematic and can be modeling using latitude, altitude and time/day of the year. 
 
 #### Visualizing spatiotemporal data
 
@@ -210,7 +210,7 @@ predict anywhere in spacetime cube.
 For more in-depth discussion on spatiotemporal data in R please refer to
 @wikle2019spatio. For in-depth discussion on spatial and spatiotemporal
 blocking for purpose of modeling building and cross-validation refer to
-@Roberts2017.
+@Roberts2017. 
 
 #### Modeling seasonal components
 
@@ -596,7 +596,7 @@ also added to spatiotemporal data problems.
 
 Ensemble Machine Learning is an approach to modeling where, instead of using a 
 single best learner, we use multiple learners and then combine their predictions. 
-This can both lead to higher accuracy and robustness, but also helps us 
+This can both lead to higher accuracy and robustness [@seni2010ensemble], but also helps us 
 determine model-free estimate of prediction errors i.e. we can help decrease some 
 methodological disadvantages of individual learners as shown in the previous 
 example with synthetic data.
