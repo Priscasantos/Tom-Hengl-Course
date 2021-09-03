@@ -4,7 +4,7 @@ Ensemble ML in R
 Created and maintained by: Tom Hengl (<tom.hengl@OpenGeoHub.org>) \|
 Leandro L. Parente (<leandro.parente@OpenGeoHub.org>) \| Carmelo
 Bonannella (<carmelo.bonannella@OpenGeoHub.org>)
-Last compiled on: 01 September, 2021
+Last compiled on: 03 September, 2021
 
 
 
@@ -21,14 +21,18 @@ Last compiled on: 01 September, 2021
     -   [Standard ML steps](#standard-ml-steps)
     -   [Extrapolation and over-fitting
         problems](#extrapolation-and-over-fitting-problems)
-    -   [Example: Spatial interpolation using ML and geographical
-        distances](#example-spatial-interpolation-using-ml-and-geographical-distances)
+    -   [Spatial interpolation using ML and buffer distances to
+        points](#spatial-interpolation-using-ml-and-buffer-distances-to-points)
+    -   [Spatial interpolation using ML and geographical distances to
+        neighbors](#spatial-interpolation-using-ml-and-geographical-distances-to-neighbors)
 -   [Spatiotemporal Ensemble ML in R](#spatiotemporal-ensemble-ml-in-r)
     -   [Ensemble ML](#ensemble-ml)
-    -   [Ensemble ML in R](#ensemble-ml-in-r)
-    -   [Example: Cookfarm dataset](#example-cookfarm-dataset)
-    -   [Example: Spatiotemporal distribution of Fagus
-        sylvatica](#example-spatiotemporal-distribution-of-fagus-sylvatica)
+    -   [Ensemble ML using the mlr
+        package](#ensemble-ml-using-the-mlr-package)
+    -   [Case study: Daily temperatures](#case-study-daily-temperatures)
+    -   [Case study: Cookfarm dataset](#case-study-cookfarm-dataset)
+    -   [Case study: Spatiotemporal distribution of Fagus
+        sylvatica](#case-study-spatiotemporal-distribution-of-fagus-sylvatica)
 -   [Summary notes](#summary-notes)
 -   [References](#references)
 
@@ -44,11 +48,13 @@ License](http://creativecommons.org/licenses/by-sa/4.0/).
 
 #### Spatiotemporal data
 
-Spatiotemporal data indicates that the data is references in both space
-and time:
+Spatiotemporal data is any data that is referenced in both space and
+time. This implies that the following coordinates are known:
 
 -   geographic location (longitude and latitude or projected *X*, *Y*
     coordinates);
+-   spatial location accuracy or size of the block / volume in the case
+    of bulking of samples;
 -   height above the ground surface (elevation);
 -   start and end time of measurement (year, month, day, hour, minute
     etc.);
@@ -56,8 +62,25 @@ and time:
 Consider for example daily temperature measured at some meteorological
 station. This would have the following coordinates:
 
+``` r
+lat = 44.56123
+lon = 19.27734
+delta.xy = 30
+begin.time = "2013-09-02 00:00:00 CEST"
+end.time = "2013-09-03 00:00:00 CEST"
+```
+
+which means that the measurement is fully spatiotemporally referenced
+with both *X*, *Y* location defined, `delta.xy` location accuracy known,
+and begin and end time of measurement specified (in this case temporal
+support is 1 day).
+
 Analysis of spatiotemporal data is somewhat different from pure spatial
-analysis. Time is not only 3rd dimension i.e. it has specific
+analysis. Time is not a spatial dimension i.e. it has specific
+properties and different statistical assumptions and methods have been
+developed for spatio- temporal data than for spatial data. For an
+introduction to spatiotemporal data in R please refer to the `spacetime`
+package tutorial ([Pebesma & others, 2012](#ref-pebesma2012spacetime)).
 
 For [Erwig, Gu, Schneider, Vazirgiannis, & others](#ref-erwig1999spatio)
 ([1999](#ref-erwig1999spatio)) spatio-temporal data sets and
@@ -73,40 +96,53 @@ In the case of working with fields, we basically map either:
 -   energy flux or any similar physical measurements,
 -   probability of occurrence of some feature or object,
 
+All these can change through time so that time-series of predictions can
+be produced to represent the variable dynamics.
+
 Spatiotemporal data can be best visualize using space-time cubes. One
-example of a spacetime cube is the following plot ([Hengl, Heuvelink,
-Tadić, & Pebesma, 2012](#ref-hengl2012spatio)):
+example of a spacetime cube is the following plot:
 
 <img src="img/Fig_space_time_cube.png" width="750"/>
 
 *Figure: Space-time cube visualized in R: (a) cloud plot showing
-location of meteorological stations in Croatia, (b) illustration of
-spatial and temporal support in the space-time cube ([Hengl, Heuvelink,
-Tadić, & Pebesma, 2012](#ref-hengl2012spatio)).*
+location of meteorological stations in Croatia ([Hengl, Heuvelink,
+Tadić, & Pebesma, 2012](#ref-hengl2012spatio)), (b) illustration of
+spatial and temporal support in the space-time cube ([Hengl, Roudier,
+Beaudette, Pebesma, & others, 2015](#ref-hengl2015plotkml)).*
 
-This shows distribution of meteorological stations over Croatia, and
-then repeated measurements through time. The spatial and temporal
-support are the sizes of the blocks of space and time to which
-measurements apply.
+The plot shows distribution of meteorological stations over Croatia, and
+then repeated measurements through time. This dataset is further used in
+the practical use cases examples.
 
 #### Time-series analysis
+
+Field of statistics dealing with modeling changes of variables through
+time, including predicting values beyond the training data (forecasting)
+is known as **time-series analysis**. Some systematic guides on how to
+run time-series analysis in R can be found
+[here](http://r-statistics.co/Time-Series-Analysis-With-R.html).
 
 How variables changes through time can often be drastically different
 from the spatial patterns. In general one can say that, for many
 environmental variables, variation of values can be separated into
 **components** such as:
 
--   Long-term component determined by long-term geological and
-    extraterrestrial processes,
--   Seasonal and daily component determined by Earth rotation and
-    incoming sun radiation,
--   *Variation* component which can be due to chaotic behavior and/or
+-   Long-term component (**trend**) determined by long-term geological
+    and extraterrestrial processes,
+-   Seasonal monthly and/or daily component (**seasonality**) determined
+    by Earth rotation and incoming sun radiation,
+-   **Variation** component which can be due to chaotic behavior and/or
     local factors (hence *autocorrelated*), and
--   Pure noise (measurement errors and similar),
+-   **Pure noise** i.e. measurement errors and similar,
 
-For example, in the case of the land surface temperature, the long-term
-component is determined by variations in Earth’s orbit and/or Sun’s
-energy output resulting in gradual drops and rises of global mean
+<img src="img/Fig_decomposition_timeseries.jpeg" width="750"/>
+
+*Figure: Illustration of decomposition of time-series into (1) trend,
+(2) seasonality, and (3) random.*
+
+Consider for example the case of the land surface temperature. The
+long-term component is determined by variations in Earth’s orbit and/or
+Sun’s energy output resulting in gradual drops and rises of global mean
 temperature ([glacials and
 interglacials](https://en.wikipedia.org/wiki/Ice_age)):
 
@@ -117,13 +153,13 @@ Shakun, Clark, & Mix](#ref-Marcott1198) ([2013](#ref-Marcott1198)). This
 shows how global temperature varies on long-term term. Graph by: Klaus
 Bitterman.*
 
-Seasonal and daily components of variation of land surface temperature
-are basically determined by Earth’s rotation and angles of Sun. This is
-a relatively deterministic part of variation as Earth’s rotation is
-relatively stable hence the patterns produced are distinct (periodic
-sinusoidal curves or similar). The plot below shows variation of values
-of soil moisture and soil temperature at one meteo station in USA
-([Gasch et al., 2015](#ref-gasch2015spatio)):
+Seasonal i.e. monthly and daily components of variation of land surface
+temperature are basically determined by Earth’s rotation and angles of
+Sun. This is a relatively deterministic part of variation as Earth’s
+rotation is relatively stable hence the patterns produced are distinct
+(periodic sinusoidal curves or similar). The plot below shows variation
+of values of soil moisture and soil temperature at one meteo station in
+USA ([Gasch et al., 2015](#ref-gasch2015spatio)):
 
 <img src="img/Fig_cookfarm_plots_seasonality.png" width="750"/>
 
@@ -132,24 +168,18 @@ at one station at Cook Agronomy Farm from January 2011–January 2014. The
 black line indicates locally fitted splines ([Gasch et al.,
 2015](#ref-gasch2015spatio)).*
 
-As we will see later, the seasonal part of variation can be modeling
-using latitude, altitude and time/day of the year.
-
-Field of statistics dealing with modeling changes of variables through
-time, including predicting values beyond the training data (forecasting)
-is known as **time-series analysis**. Some systematic guides on how to
-run time-series analysis in R can be found
-[here](http://r-statistics.co/Time-Series-Analysis-With-R.html).
+As we will see later, the seasonal daily and monthly part of variation
+can be modeling using latitude, altitude and time/day of the year.
 
 #### Visualizing spatiotemporal data
 
 Spatial data is usually visualized using static or interactive maps (see
 e.g. [mapview](https://r-spatial.github.io/mapview/) and/or [tmap
 package](https://cran.r-project.org/web/packages/tmap/vignettes/tmap-getstarted.html)).
-Spatiotemporal data (2D+T) is more complex to visualize, while 3D+T data
-can even require some expertise in the field ([Hengl, Roudier,
-Beaudette, Pebesma, & others, 2015](#ref-hengl2015plotkml)) before user
-can make any seamless interpretation.
+Spatiotemporal data (2D+T) is more complex to visualize than 2D data,
+while 3D+T data can even require some expertise in the field ([Hengl,
+Roudier, Beaudette, Pebesma, & others, 2015](#ref-hengl2015plotkml))
+before user can make any seamless interpretation.
 
 There are three possible groups of ways to visualize spatiotemporal
 data:
@@ -161,15 +191,16 @@ data:
 3.  Using **animations** or **interactive plots with time-sliders**
     allowing users to choose *speed* and *direction* of animation.
 
-For an introduction to visualizying spatiotemporal and time-series data
-is [Lamigueiro](#ref-lamigueiro2014displaying)
+For an introduction to visualizing spatiotemporal and time-series data
+refer to [Lamigueiro](#ref-lamigueiro2014displaying)
 ([2014](#ref-lamigueiro2014displaying)). More complex visualization of
 spatiotemporal / dynamic features is possible by using the
 <https://geemap.org/> package (*A Python package for interactive mapping
-with Google Earth Engine, ipyleaflet, and ipywidgets*). OpenLandMap.org
-has multiple temporal datasets and users can interactive with
-time-dimension by using the time-slider implemented in [OpenLayers +
-Geoserver](http://osgl.grf.bg.ac.rs/books/gvvk-en/) ([M. Kilibarda &
+with Google Earth Engine, ipyleaflet, and ipywidgets*).
+
+OpenLandMap.org has multiple temporal datasets and users can interactive
+with time-dimension by using the time-slider implemented in [OpenLayers
++ Geoserver](http://osgl.grf.bg.ac.rs/books/gvvk-en/) ([M. Kilibarda &
 Protić, 2019](#ref-KilibardaProtic2019)).
 
 <img src="img/Fig_HILDA_visualization_landcover.gif" width="750"/>
@@ -183,18 +214,21 @@ in www.OpenLandMap.org.*
 Spatiotemporal interpolation and/or prediction implies that point
 samples are used to interpolate within the spacetime cube. This
 obviously assumes that enough point measurements are available spread in
-both space and time. Spatiotemporal interpolation using various kriging
-methods is implemented in the [gstat
-package](https://cran.r-project.org/web/packages/gstat/vignettes/spatio-temporal-kriging.pdf).
-We will show in this tutorial that Machine Learning can be used to
-interpolate values within the spacetime cube. For success of
-spatiotemporal interpolation, the key is to recognize systematic
-component of variation in spacetime, which is usually possible if we
-find relationship between the target variable and some EO data
-(temporally dynamic) that is available possibly at high spatial
-resolution.
+both space and time. We will show in this tutorial how Machine Learning
+can be used to interpolate values within the spacetime cube.
+Spatiotemporal interpolation using various kriging methods is
+implemented in the [gstat
+package](https://cran.r-project.org/web/packages/gstat/vignettes/spatio-temporal-kriging.pdf)
+and is not addressed in this tutorial.
 
-For more in-depth discussion on spatitemporal data in R please refer to
+For success of spatiotemporal interpolation (in terms of prediction
+accuracy), the key is to recognize systematic component of variation in
+spacetime, which is usually possible if we find relationship between the
+target variable and some EO data (temporally dynamic) that is available
+possibly at high spatial resolution. Once we establish a significant
+relation, we can use this to predict anywhere in spacetime cube.
+
+For more in-depth discussion on spatiotemporal data in R please refer to
 [Wikle, Zammit-Mangion, & Cressie](#ref-wikle2019spatio)
 ([2019](#ref-wikle2019spatio)). For in-depth discussion on spatial and
 spatiotemporal blocking for purpose of modeling building and
@@ -203,12 +237,21 @@ cross-validation refer to [Roberts et al.](#ref-Roberts2017)
 
 #### Modeling seasonal components
 
-The seasonal component of variation is determined by Earth’s rotation
-and Sun’s angle. [Milan Kilibarda et al.](#ref-kilibarda2014spatio)
-([2014](#ref-kilibarda2014spatio)) have shown that the seasonal
-component e.g. geometric Earth surface minimum and maximum temperature,
-which can be modeled universally anywhere on globe by using the
-following formula:
+Seasonality is the feature of data to follow cyclical patterns such as
+in trigonometric functions. Such repeating patterns can happen at
+different time-supports:
+
+-   inter-annually,
+-   monthly or based on season,
+-   daily,
+-   hourly i.e. day-time and night-time patterns,
+
+The monthly and daily seasonal component of variation is determined by
+Earth’s rotation and Sun’s angle. [Milan Kilibarda et
+al.](#ref-kilibarda2014spatio) ([2014](#ref-kilibarda2014spatio)) have
+shown that the seasonal component e.g. geometric Earth surface minimum
+and maximum daily temperature can be modeled universally anywhere on
+globe by using the following formula:
 
 ``` r
 temp.from.geom <- function(fi, day, a=30.419375, 
@@ -229,7 +272,7 @@ southern hemisphere, `elev` is the elevation in meter, 0.6 is the
 vertical temperature gradient per 100\~m, and `sign` denotes the
 *signum* function that extracts the sign of a real number.
 
-A simple example of min temperature is:
+A simple example of min daily temperature is:
 
 ``` r
 temp.from.geom(fi=52, day=120)
@@ -261,36 +304,34 @@ compute and can be added universally to any spatiotemporal model.
 
 #### Standard ML steps
 
-Standard spatiotemporal ML includes the following steps:
+Standard spatiotemporal ML for predictive mapping includes the following
+steps:
 
 1.  Prepare training (points) data and data cube with all covariates
-    referenced in spacetime.  
-2.  Overlay points in spacetime, create a spatiotemporal
-    regression-matrix.  
-3.  Add seasonal components, fine-tune initial model, reduce complexity
-    and produce production-ready spatiotemporal prediction model.  
+    ideally as an analysis-ready datacube.
+2.  Overlay points and create a regression-matrix.  
+3.  Fine-tune initial model, reduce complexity and produce
+    production-ready prediction model.  
 4.  Run mapping accuracy assessment and determine prediction uncertainty
     including the per pixel uncertainty.  
-5.  Generate predictions in spacetime — create time-series of
-    predictions.  
-6.  Run change-detection / trend analysis and try to detect main drivers
-    of positive / negative trends.  
-7.  Deploy predictions as Cloud-Optimized GeoTIFF and produce the final
-    report with mapping accuracy, variable importance.
+5.  Generate predictions and save as maps.
+6.  Visualize predictions using web-GIS solutions.
 
 #### Extrapolation and over-fitting problems
 
 Machine Learning techniques such as Random Forest have proven to
 over-perform vs more simple linear statistical methods, especially where
 the datasets are large, complex and target variable follow complex
-relationship with covariates. Random Forest comes at cost, there are
-four main disadvantages of RF:
+relationship with covariates ([Hengl, Nussbaum, Wright, Heuvelink, &
+Gräler, 2018](#ref-hengl2018random)). Random Forest comes at cost,
+however. There are four main disadvantages of RF:
 
 -   Depending on data and assumptions about data, it can over-fit values
     without an analyst noticing it.  
 -   It predicts well only within the feature space with enough training
     data. Extrapolation i.e. prediction outside the training space can
-    lead to poor performance.  
+    lead to poor performance ([Meyer & Pebesma,
+    2020](#ref-meyerPebesma2020)).  
 -   It can be computationally expensive, computational load increasing
     exponentially with the number of covariates.  
 -   It requires quality training data and is sensitive to blunders and
@@ -380,7 +421,9 @@ newdata <- data.frame(
 newdata$y.lm <- predict(m0, newdata = newdata)
 ## prediction error from forestError:
 quantiles = c((1-.682)/2, 1-(1-.682)/2)
-pr.rf = quantForestError(rf, X.train=data.frame(x=x), X.test=data.frame(x = -100:200), Y.train=y, alpha = (1-(quantiles[2]-quantiles[1])))
+pr.rf = forestError::quantForestError(rf, X.train=data.frame(x=x), 
+                          X.test=data.frame(x = -100:200), 
+                          Y.train=y, alpha = (1-(quantiles[2]-quantiles[1])))
 newdata$y.rf <- predict(rf, newdata = newdata)
 rmse.lm <- round(rmse(y, predict(m0)), 1)
 rmse.rf <- round(rmse(y, predict(rf)), 1)
@@ -393,7 +436,7 @@ rmse.lm; rmse.rf
 
 This shows that RF estimates higher RMSE than linear model. However, if
 we visualize the two models against each other we see that indeed RF
-model seems to over-fit the data:
+algorithm seems to over-fit this specific data:
 
 ``` r
 leg.txt <- sprintf("%s (%s)", c('lm', 'RF'), c(rmse.lm, rmse.rf))
@@ -417,10 +460,10 @@ Difference in model fits for sythetic data: lm vs RF.
 
 </div>
 
-We can notice that RF basically tries to fit relationship even to the
-component of variation which is pure noise (we know this because we have
-generated it using the `rnorm` function). This is obvious over-fitting
-as we do not want to model something which is purely random.
+RF basically tries to fit relationship even to the component of
+variation which is pure noise (we know this because we have generated it
+using the `rnorm` function). This is obvious over-fitting as we do not
+want to model something which is purely random.
 
 Extrapolation would not maybe be so much of a problem in the example
 above if the prediction intervals from the `forestError` package
@@ -494,17 +537,6 @@ Second, we train the Ensemble model by using the stacking approach:
 ``` r
 init.m <- mlr::makeStackedLearner(lrns, method = "stack.cv", super.learner = "regr.lm", resampling=mlr::makeResampleDesc(method = "CV"))
 eml = train(init.m, tsk)
-```
-
-    ## Warning in bsplines(mf[[i]], knots = args$knots[[i]]$knots, boundary.knots =
-    ## args$knots[[i]]$boundary.knots, : Some 'x' values are beyond 'boundary.knots';
-    ## Linear extrapolation used.
-
-    ## Warning in bsplines(mf[[i]], knots = args$knots[[i]]$knots, boundary.knots =
-    ## args$knots[[i]]$boundary.knots, : Some 'x' values are beyond 'boundary.knots';
-    ## Linear extrapolation used.
-
-``` r
 summary(eml$learner.model$super.model$learner.model)
 ```
 
@@ -548,13 +580,6 @@ variance derived simply as a standard deviation of learners:
 
 ``` r
 newdata$y.eml = predict(eml, newdata = newdata)$data$response
-```
-
-    ## Warning in bsplines(mf[[i]], knots = args$knots[[i]]$knots, boundary.knots =
-    ## args$knots[[i]]$boundary.knots, : Some 'x' values are beyond 'boundary.knots';
-    ## Linear extrapolation used.
-
-``` r
 m.train = eml$learner.model$super.model$learner.model$model
 m.terms = eml$learner.model$super.model$learner.model$terms
 eml.MSE0 = matrixStats::rowSds(as.matrix(m.train[,all.vars(m.terms)[-1]]), na.rm=TRUE)^2
@@ -575,13 +600,6 @@ Next, we can predict values and prediction errors at all new locations:
 
 ``` r
 pred = mlr::getStackedBaseLearnerPredictions(eml, newdata=data.frame(x = -100:200))
-```
-
-    ## Warning in bsplines(mf[[i]], knots = args$knots[[i]]$knots, boundary.knots =
-    ## args$knots[[i]]$boundary.knots, : Some 'x' values are beyond 'boundary.knots';
-    ## Linear extrapolation used.
-
-``` r
 rf.sd = sqrt(matrixStats::rowSds(as.matrix(as.data.frame(pred)), na.rm=TRUE)^2 * eml.cf)
 rmse.eml <- round(sqrt(eml.MSE), 1)
 ```
@@ -610,17 +628,17 @@ Difference in model fits for sythetic data: lm vs Ensemble ML.
 
 </div>
 
-Note that from the plot above, prediction error intervals in the
-extrapolation space can be quite wide, and this reflects much better
-what we would expect.
+From the plot above, prediction error intervals in the extrapolation
+space can be quite wide, and this now reflects much better what we would
+expect than if we have only used the `forestError` package.
 
 In summary: it appears that combining linear and non-linear tree-based
-models both helps decrease over-fitting and produce realistic
+models both helps decrease over-fitting and produce more realistic
 predictions of uncertainty / prediction intervals. The Ensemble ML
 framework correctly identifies linear models as being more important
 than random forest or similar.
 
-#### Example: Spatial interpolation using ML and geographical distances
+#### Spatial interpolation using ML and buffer distances to points
 
 One simple approach to interpolate values from point data using e.g.
 Random Forest is to use buffer distances to all points as covariates. We
@@ -723,6 +741,7 @@ m.zinc
 Using this model we can generate and plot predictions using:
 
 ``` r
+op <- par(oma=c(0,0,0,1), mar=c(0,0,4,3))
 zinc.rfd <- predict(m.zinc, grid.dist0@data)$predictions
 meuse.grid$zinc.rfd = zinc.rfd
 plot(raster(meuse.grid["zinc.rfd"]), col=R_pal[["rainbow_75"]][4:20],
@@ -739,8 +758,14 @@ Values of Zinc predicted using only RF on buffer distances.
 
 </div>
 
-This method is obviously not suitable for very large point datasets.
-[Sekulić, Kilibarda, Heuvelink, Nikolić, &
+``` r
+par(op)
+```
+
+#### Spatial interpolation using ML and geographical distances to neighbors
+
+Deriving buffer distances for all points is obviously not suitable for
+very large point datasets. [Sekulić, Kilibarda, Heuvelink, Nikolić, &
 Bajat](#ref-sekulic2020random) ([2020](#ref-sekulic2020random)) describe
 an alternative, more scalable method that uses closest neighbors (and
 their values) as covariates to predict target variable. This can be
@@ -748,25 +773,10 @@ implemented using the `meteo` package:
 
 ``` r
 library(meteo)
-```
-
-    ## Warning: replacing previous import 'caret::MAE' by 'DescTools::MAE' when loading
-    ## 'meteo'
-
-    ## Warning: replacing previous import 'caret::RMSE' by 'DescTools::RMSE' when
-    ## loading 'meteo'
-
-``` r
 nearest_obs <- meteo::near.obs(locations = meuse.grid, 
                                locations.x.y = c("x","y"), 
                                observations = meuse, observations.x.y=c("x","y"), 
                                zcol = "zinc", n.obs = 10, rm.dupl = TRUE)
-```
-
-    ## Warning in if (class(knn1$nn.idx) != "integer") {: the condition has length > 1
-    ## and only the first element will be used
-
-``` r
 str(nearest_obs)
 ```
 
@@ -822,12 +832,6 @@ nearest_obs.dev <- meteo::near.obs(locations = meuse,
                                    observations = meuse, 
                                    observations.x.y=c("x","y"), 
                                    zcol = "zinc", n.obs = 10, rm.dupl = TRUE)
-```
-
-    ## Warning in if (class(knn1$nn.idx) != "integer") {: the condition has length > 1
-    ## and only the first element will be used
-
-``` r
 meuse@data <- cbind(meuse@data, nearest_obs.dev)
 ```
 
@@ -869,6 +873,7 @@ To produce predictions we can run:
 ``` r
 out = predict(rf_RFSI, meuse.gridF@data)
 meuse.grid$zinc.rfsi = out$predictions
+op <- par(oma=c(0,0,0,1), mar=c(0,0,4,3))
 plot(raster(meuse.grid["zinc.rfsi"]), col=R_pal[["rainbow_75"]][4:20],
      main="Predictions RFSI", axes=FALSE, box=FALSE)
 points(meuse, pch="+")
@@ -884,32 +889,468 @@ Values of first neighbor for meuse dataset.
 </div>
 
 ``` r
+par(op)
 #dev.off()
 ```
 
-Predictions using nearest neighbors shows quite different patterns than
-predictions based on buffer distances. The method by [Sekulić,
-Kilibarda, Heuvelink, Nikolić, & Bajat](#ref-sekulic2020random)
-([2020](#ref-sekulic2020random)) is nevertheless more interest for
-general applications as it could be also added to spatiotemporal data
-problems.
+Note that predictions using nearest neighbors shows quite different
+patterns than predictions based on buffer distances. The method by
+[Sekulić, Kilibarda, Heuvelink, Nikolić, &
+Bajat](#ref-sekulic2020random) ([2020](#ref-sekulic2020random)) is
+nevertheless more interest for general applications as it could be also
+added to spatiotemporal data problems.
 
 ## Spatiotemporal Ensemble ML in R
 
 #### Ensemble ML
 
-Ensemble Machine Learning is discussed in detail in [this R
+Ensemble Machine Learning is an approach to modeling where, instead of
+using a single best learner, we use multiple learners and then combine
+their predictions. This can both lead to higher accuracy and robustness,
+but also helps us determine model-free estimate of prediction errors
+i.e. we can help decrease some methodological disadvantages of
+individual learners as shown in the previous example with synthetic
+data.
+
+Ensemble Machine Learning for predictive mapping in 2D and 3D is
+discussed in detail in [this R
 tutorial](https://gitlab.com/openlandmap/spatial-predictions-using-eml).
+This tutorial focuses primarily on using EML for spatiotemporal data
+sets (2D+T, 3D+T).
 
-#### Ensemble ML in R
+#### Ensemble ML using the mlr package
 
-#### Example: Cookfarm dataset
+#### Case study: Daily temperatures
 
 In previous examples we have demonstrated effects of over-fitting and
 how Ensemble ML helps decrease overfitting and extrapolation problems
-using synthetic data. We can now look at some real-life cases, for
-example the **Cookfarm dataset**, which is available via the landmap
-package:
+using synthetic data. We can now look at some real-life cases for
+example the daily temperatures measured for several years for Croatia
+described in [Hengl, Heuvelink, Tadić, & Pebesma](#ref-hengl2012spatio)
+([2012](#ref-hengl2012spatio)). This data sets consist of two sets: (1)
+measurements of daily temperatures at meteo stations, (2) list of
+gridded covariates.
+
+<img src="img/Fig_stations_meteo_croatia.png" width="750"/>
+
+*Figure: Temporal dynamics of mean-daily temperatures at sample
+meteorological stations. This shows seasonality effects (smoothed line)
+and daily oscilations ([Hengl, Heuvelink, Tadić, & Pebesma,
+2012](#ref-hengl2012spatio)).*
+
+We can load the point data by using:
+
+``` r
+library(rgdal)
+hrmeteo = readRDS("input/hrtemp2006_meteo.rds")
+str(hrmeteo)
+```
+
+    ## List of 2
+    ##  $ meteo   :'data.frame':    44895 obs. of  5 variables:
+    ##   ..$ IDSTA : chr [1:44895] "GL001" "GL001" "GL001" "GL001" ...
+    ##   ..$ DATE  : chr [1:44895] "2006-1-1" "2006-1-2" "2006-1-3" "2006-1-4" ...
+    ##   ..$ MDTEMP: num [1:44895] 1.6 0.7 1.5 0.3 -0.1 1 0.3 -1.9 -5.4 -3.6 ...
+    ##   ..$ cday  : num [1:44895] 13148 13149 13150 13151 13152 ...
+    ##   .. ..- attr(*, "tzone")= chr ""
+    ##   ..$ x     : num [1:44895] NA NA NA NA NA NA NA NA NA NA ...
+    ##  $ stations:'data.frame':    152 obs. of  3 variables:
+    ##   ..$ IDSTA: chr [1:152] "GL001" "GL002" "GL003" "GL004" ...
+    ##   ..$ X    : num [1:152] 670760 643073 673778 752344 767729 ...
+    ##   ..$ Y    : num [1:152] 5083464 5086417 5052001 4726567 4717878 ...
+
+``` r
+idsta.pnts = hrmeteo$stations
+coordinates(idsta.pnts) = ~ X + Y
+```
+
+This is a typical format for spatiotemporal data with locations of
+stations in one table, and measurements of daily temperatue (`MDTEMP`).
+The column `cday` is the cumulative day since 1970, which allows us to
+present time on linear scale.
+
+The gridded data includes (a) static data, (b) dynamic time-series data
+(MODIS LST). To load the static data we use:
+
+``` r
+hrgrid1km = readRDS("input/hrgrid1km.rds")
+#plot(hrgrid1km[1])
+proj4string(idsta.pnts) = proj4string(hrgrid1km)
+str(hrgrid1km@data)
+```
+
+    ## 'data.frame':    238630 obs. of  4 variables:
+    ##  $ HRdem : int  1599 1426 1440 1764 1917 1912 1707 1550 1518 1516 ...
+    ##  $ HRdsea: num  93 89.6 89.8 93.6 95 ...
+    ##  $ Lat   : num  46.5 46.5 46.5 46.5 46.5 ...
+    ##  $ Lon   : num  13.2 13.2 13.2 13.2 13.2 ...
+
+The dynamic data is stored in a local folder (`input/LST2006HR`) and we
+can list them using:
+
+``` r
+LST.listday <- dir("input/LST2006HR", pattern=glob2rx("LST2006_**_**.LST_Day_1km.tif"), full.names = TRUE)
+LST.listnight <- dir("input/LST2006HR", pattern=glob2rx("LST2006_**_**.LST_Night_1km.tif"), full.names = TRUE)
+str(LST.listday)
+```
+
+    ##  chr [1:46] "input/LST2006HR/LST2006_01_01.LST_Day_1km.tif" ...
+
+Here we see there are 46 images for year 2006 with daytime and 46 images
+for night time estimates of LST. We do not want to load all rasters to R
+because we are first only interested in modeling with this variable.
+
+For the static covariates we only have to run the overlay once:
+
+``` r
+idsta.ov <- sp::over(idsta.pnts, hrgrid1km)
+idsta.ov$IDSTA = idsta.pnts$IDSTA
+str(idsta.ov)
+```
+
+    ## 'data.frame':    152 obs. of  5 variables:
+    ##  $ HRdem : int  161 134 202 31 205 563 80 96 116 228 ...
+    ##  $ HRdsea: num  198.5 181.7 192.9 0 1.5 ...
+    ##  $ Lat   : num  45.9 45.9 45.6 42.7 42.6 ...
+    ##  $ Lon   : num  17.2 16.8 17.2 18.1 18.3 ...
+    ##  $ IDSTA : chr  "GL001" "GL002" "GL003" "GL004" ...
+
+For the spatiotemporal data (MODIS LST time-series) we need to run
+overlay as in a spacetime cube. This means that we need to match points
+in `x,y,t` with grids covering the same period. To speed up this we use
+the function `extract_st` which basically builds on top of the `terra`
+package. First, we need to define begin, end times for each GeoTIFF,
+then, we can match and overlay `x,y,t` points and rasters:
+
+``` r
+library(terra)
+```
+
+    ## terra version 0.8.11 (beta-release)
+
+    ## 
+    ## Attaching package: 'terra'
+
+    ## The following object is masked from 'package:rgdal':
+    ## 
+    ##     project
+
+    ## The following object is masked from 'package:kernlab':
+    ## 
+    ##     size
+
+``` r
+source("mlst_functions.R")
+hrmeteo$meteo$x = plyr::join(hrmeteo$meteo, hrmeteo$stations, by="IDSTA")$X
+hrmeteo$meteo$y = plyr::join(hrmeteo$meteo, hrmeteo$stations, by="IDSTA")$Y
+## generate row ID:
+hrmeteo$meteo$row.id = 1:nrow(hrmeteo$meteo)
+hrmeteo$meteo$Date = as.Date(hrmeteo$meteo$DATE, format = "%Y-%m-%d")
+## strip dates from filename:
+begin.tif1.lst = as.Date(paste0("2006-", substr(basename(LST.listday), 9, 10), 
+                  "-", substr(basename(LST.listday), 12, 13)))-4
+end.tif1.lst = as.Date(paste0("2006-", substr(basename(LST.listday), 9, 10), 
+                  "-", substr(basename(LST.listday), 12, 13)))+4
+ov.pnts <- parallel::mclapply(1:length(LST.listday), function(i){ 
+     extract_st(tif=LST.listday[i], hrmeteo$meteo, date="Date", 
+                crs = proj4string(hrgrid1km),        
+                date.tif.begin=begin.tif1.lst[i], 
+                date.tif.end=end.tif1.lst[i], 
+                coords=c("x","y"), variable.name="LST.day") }, 
+     mc.cores=parallel::detectCores())
+ov.pnts = ov.pnts[!sapply(ov.pnts, is.null)]
+ov.tifs1 = plyr::join_all(ov.pnts, by="row.id", type="full")
+str(ov.tifs1)
+```
+
+    ## 'data.frame':    44895 obs. of  2 variables:
+    ##  $ LST.day: num  0 0 0 0 0 0 0 0 0 0 ...
+    ##  $ row.id : int  1 2 3 4 5 366 367 368 369 370 ...
+
+``` r
+ov.tifs1$LST.day = ifelse(ov.tifs1$LST.day == 0, NA, ov.tifs1$LST.day)
+```
+
+In this case value of `LST.day` that were equal to 0 are missing value
+in the GeoTIFFs and need to be excluded. We repeat the same overlay for
+night light images:
+
+``` r
+begin.tif2.lst = as.Date(paste0("2006-", substr(basename(LST.listnight), 9, 10), 
+                  "-", substr(basename(LST.listnight), 12, 13)))-4
+end.tif2.lst = as.Date(paste0("2006-", substr(basename(LST.listnight), 9, 10), 
+                  "-", substr(basename(LST.listnight), 12, 13)))+4
+ov.pnts <- parallel::mclapply(1:length(LST.listnight), function(i){ 
+     extract_st(tif=LST.listnight[i], hrmeteo$meteo, date="Date", 
+                crs = proj4string(hrgrid1km),        
+                date.tif.begin=begin.tif2.lst[i], 
+                date.tif.end=end.tif2.lst[i], 
+                coords=c("x","y"), variable.name="LST.night") }, 
+     mc.cores=parallel::detectCores())
+ov.pnts = ov.pnts[!sapply(ov.pnts, is.null)]
+ov.tifs2 = plyr::join_all(ov.pnts, by="row.id", type="full")
+str(ov.tifs2)
+```
+
+    ## 'data.frame':    44895 obs. of  2 variables:
+    ##  $ LST.night: num  13344 13344 13344 13344 13344 ...
+    ##  $ row.id   : int  1 2 3 4 5 366 367 368 369 370 ...
+
+``` r
+ov.tifs2$LST.night = ifelse(ov.tifs2$LST.night == 0, NA, ov.tifs2$LST.night)
+```
+
+Note the result of overlay is a simple long table matching exactly the
+meteo-data table. We next bind results of overlay using static and
+dynamic covariates, which gives:
+
+``` r
+hrmeteo.rm = plyr::join_all(list(hrmeteo$meteo, ov.tifs1, ov.tifs2))
+```
+
+    ## Joining by: row.id
+    ## Joining by: row.id
+
+``` r
+hrmeteo.rm = plyr::join(hrmeteo.rm, idsta.ov)
+```
+
+    ## Joining by: IDSTA
+
+we also add the geometric component of temperature based on the sphere
+formulas:
+
+``` r
+hrmeteo.rm$temp.mean <- temp.from.geom(fi=hrmeteo.rm$Lat, 
+                   as.numeric(strftime(hrmeteo.rm$Date, format = "%j")), 
+                   a=37.03043, b=-15.43029, elev=hrmeteo.rm$HRdem, t.grad=0.6)
+```
+
+We have now produced a spatiotemporal regression matrix that can be used
+to fit a prediction model for daily temperature. The model is of form:
+
+``` r
+fm.tmp <- MDTEMP ~ temp.mean + LST.day + LST.night + HRdsea
+```
+
+We next fit an Ensemble ML using the same process described before:
+
+``` r
+library(mlr)
+lrn.rf = mlr::makeLearner("regr.ranger", num.trees=150, importance="impurity",
+                              num.threads = parallel::detectCores())
+lrns.st <- list(lrn.rf, mlr::makeLearner("regr.nnet"), mlr::makeLearner("regr.gamboost"))
+sel = complete.cases(hrmeteo.rm[,all.vars(fm.tmp)])
+hrmeteo.rm = hrmeteo.rm[sel,]
+#summary(sel)
+subs <- runif(nrow(hrmeteo.rm))<.2
+tsk0.st <- mlr::makeRegrTask(data = hrmeteo.rm[subs,all.vars(fm.tmp)], 
+            target = "MDTEMP", blocking = as.factor(hrmeteo.rm$IDSTA[subs]))
+tsk0.st
+```
+
+    ## Supervised task: hrmeteo.rm[subs, all.vars(fm.tmp)]
+    ## Type: regr
+    ## Target: MDTEMP
+    ## Observations: 7594
+    ## Features:
+    ##    numerics     factors     ordered functionals 
+    ##           4           0           0           0 
+    ## Missings: FALSE
+    ## Has weights: FALSE
+    ## Has blocking: TRUE
+    ## Has coordinates: FALSE
+
+Train model using a subset of points:
+
+    ## Starting parallelization in mode=socket with cpus=32.
+
+    ## Exporting objects to slaves for mode socket: .mlr.slave.options
+
+    ## Mapping in parallel: mode = socket; level = mlr.resample; cpus = 32; elements = 10.
+
+    ## Exporting objects to slaves for mode socket: .mlr.slave.options
+
+    ## Mapping in parallel: mode = socket; level = mlr.resample; cpus = 32; elements = 10.
+
+    ## # weights:  19
+    ## initial  value 1892102.547382 
+    ## final  value 512974.365752 
+    ## converged
+
+    ## Exporting objects to slaves for mode socket: .mlr.slave.options
+    ## Mapping in parallel: mode = socket; level = mlr.resample; cpus = 32; elements = 10.
+
+    ## Stopped parallelization. All cleaned up.
+
+This shows that daily temperatures can be predicted with relatively high
+R-square, although the residual values are still significant ranging
+from -1.8 t0 1.8 degrees:
+
+``` r
+summary(eml.TMP$learner.model$super.model$learner.model)
+```
+
+    ## 
+    ## Call:
+    ## stats::lm(formula = f, data = d)
+    ## 
+    ## Residuals:
+    ##      Min       1Q   Median       3Q      Max 
+    ## -17.7910  -1.8282   0.0673   1.8112  12.4129 
+    ## 
+    ## Coefficients:
+    ##               Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)   10.65213    6.08547   1.750   0.0801 .  
+    ## regr.ranger    0.67279    0.02825  23.813   <2e-16 ***
+    ## regr.nnet     -0.83706    0.47593  -1.759   0.0787 .  
+    ## regr.gamboost  0.33010    0.02846  11.597   <2e-16 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 2.896 on 7590 degrees of freedom
+    ## Multiple R-squared:  0.8759, Adjusted R-squared:  0.8759 
+    ## F-statistic: 1.786e+04 on 3 and 7590 DF,  p-value: < 2.2e-16
+
+The variable importance show that the most important variable for
+predicting daily temperatures is in fact the night-time temperature:
+
+``` r
+library(ggplot2)
+```
+
+    ## 
+    ## Attaching package: 'ggplot2'
+
+    ## The following object is masked from 'package:mboost':
+    ## 
+    ##     %+%
+
+    ## The following object is masked from 'package:kernlab':
+    ## 
+    ##     alpha
+
+    ## The following object is masked from 'package:randomForest':
+    ## 
+    ##     margin
+
+``` r
+xl <- as.data.frame(mlr::getFeatureImportance(eml.TMP[["learner.model"]][["base.models"]][[1]])$res)
+xl$relative_importance = 100*xl$importance/sum(xl$importance)
+xl = xl[order(xl$relative_importance, decreasing = TRUE),]
+xl$variable = paste0(c(1:length(xl$variable)), ". ", xl$variable)
+ggplot(data = xl[1:4,], aes(x = reorder(variable, relative_importance), y = relative_importance)) +
+  geom_bar(fill = "steelblue",
+           stat = "identity") +
+  coord_flip() +
+  labs(title = "Variable importance",
+       x = NULL,
+       y = NULL) +
+  theme_bw() + theme(text = element_text(size=15))
+```
+
+<div class="figure">
+
+<img src="README_files/figure-gfm/var-imptemp-1.png" alt="Variable importance for modeling spacetime daily temperatures." width="50%" />
+<p class="caption">
+Variable importance for modeling spacetime daily temperatures.
+</p>
+
+</div>
+
+We can generate predictions for 4 consecutive days in August. First, we
+import MODIS LST for August:
+
+``` r
+hrpred1km = hrgrid1km
+sel.tifs1 = LST.listday[grep("_08_", LST.listday)]
+sel.tifs2 = LST.listnight[grep("_08_", LST.listnight)]
+## read to R in parallel
+x1 = as.data.frame( parallel::mclapply(sel.tifs1, 
+            function(i){x <- readGDAL(i)$band1; x <- ifelse(x<1, NA, x); return(x)}, 
+             mc.cores = parallel::detectCores()))
+x2 = as.data.frame( parallel::mclapply(sel.tifs2, 
+            function(i){x <- readGDAL(i)$band1; x <- ifelse(x<1, NA, x); return(x)}, 
+             mc.cores = parallel::detectCores()))
+names(x1)  <- basename(sel.tifs1); names(x2) <- basename(sel.tifs2)
+```
+
+Second, we interpolate values between dates because MODIS images are
+available only every 8 days:
+
+Now we can make predictions for the target days in August 2006 by using:
+
+``` r
+for(j in paste(dates.lst)){
+  out.tif = paste0("output/MDTEMP_", j, ".tif")
+  if(!file.exists(out.tif)){
+    hrpred1km@data[,"LST.day"] = t1s[,paste0("LST.day_", j)]
+    hrpred1km@data[,"LST.night"] = t2s[,paste0("LST.night_", j)]
+    hrpred1km$temp.mean = temp.from.geom(fi=hrpred1km$Lat, 
+                     as.numeric(strftime(as.Date(j), format = "%j")), 
+                     a=37.03043, b=-15.43029, elev=hrpred1km$HRdem, t.grad=0.6)
+    sel.pix = complete.cases(hrpred1km@data[,eml.TMP$features])
+    out = predict(eml.TMP, newdata=hrpred1km@data[sel.pix,eml.TMP$features])
+    hrpred1km@data[,paste0("MDTEMP_", j)] = NA
+    hrpred1km@data[sel.pix, make.names(paste0("MDTEMP_", j))] = out$data$response * 10
+    writeGDAL(hrpred1km[make.names(paste0("MDTEMP_", j))], out.tif, mvFlag = -32768,
+              type = "Int16", options = c("COMPRESS=DEFLATE"))
+  } else {
+    hrpred1km@data[,make.names(paste0("MDTEMP_", j))] = readGDAL(out.tif)$band1
+  }
+}
+```
+
+    ## output/MDTEMP_2006-08-14.tif has GDAL driver GTiff 
+    ## and has 487 rows and 490 columns
+    ## output/MDTEMP_2006-08-15.tif has GDAL driver GTiff 
+    ## and has 487 rows and 490 columns
+    ## output/MDTEMP_2006-08-16.tif has GDAL driver GTiff 
+    ## and has 487 rows and 490 columns
+    ## output/MDTEMP_2006-08-17.tif has GDAL driver GTiff 
+    ## and has 487 rows and 490 columns
+    ## output/MDTEMP_2006-08-18.tif has GDAL driver GTiff 
+    ## and has 487 rows and 490 columns
+    ## output/MDTEMP_2006-08-19.tif has GDAL driver GTiff 
+    ## and has 487 rows and 490 columns
+    ## output/MDTEMP_2006-08-20.tif has GDAL driver GTiff 
+    ## and has 487 rows and 490 columns
+    ## output/MDTEMP_2006-08-21.tif has GDAL driver GTiff 
+    ## and has 487 rows and 490 columns
+
+To plot the predictions we can either put predictions in the `spacetime`
+package class (see [gstat
+tutorial](https://cran.r-project.org/web/packages/gstat/vignettes/spatio-temporal-kriging.pdf)),
+or simply plot them using `sp` package:
+
+``` r
+st.pts = list("sp.points", idsta.pnts, pch = "+", col="black")
+spplot(hrpred1km[make.names(paste0("MDTEMP_", dates.lst[c(1,4,8)]))], 
+      col.regions=R_pal[["rainbow_75"]][4:20],
+      at = seq(143, 239, length.out=17),
+      sp.layout = list(st.pts),
+      main="Prediction daily temperature")
+```
+
+<div class="figure">
+
+<img src="README_files/figure-gfm/st-plottemp-1.png" alt="Predictions spacetime daily temperature for August 2006." width="90%" />
+<p class="caption">
+Predictions spacetime daily temperature for August 2006.
+</p>
+
+</div>
+
+In summary, this example shows how to fit spatiotemporal EML with using
+also seasonality component together with the EO data, and can hence be
+considered a *complete framework* for spatiotemporal interpolation as
+both static, dynamic covariates and latitude / elevation are used for
+model training.
+
+#### Case study: Cookfarm dataset
+
+We next look at the **Cookfarm dataset**, which is available via the
+landmap package:
 
 ``` r
 library(landmap)
@@ -965,21 +1406,23 @@ m.vw
     ## Target node size:                 5 
     ## Variable importance mode:         none 
     ## Splitrule:                        variance 
-    ## OOB prediction error (MSE):       0.0009823271 
-    ## R squared (OOB):                  0.8480396
+    ## OOB prediction error (MSE):       0.0009766977 
+    ## R squared (OOB):                  0.8489105
 
 which shows that a significant model can be fitting using this data with
 R-square above 0.80. This model, however, as shown in [Gasch et
 al.](#ref-gasch2015spatio) ([2015](#ref-gasch2015spatio)) unfortunately
 ignores the fact that many `VW` measurements have exactly the same
-location, hence it over-fitts data and gives unrealistic R-square.
+location (monitoring station with 4 depths), hence it over-fits data and
+gives unrealistic R-square.
 
 We can now fit an Ensemble ML model, but we will also use a **blocking
 parameter** that should protect from over-fitting: the unique code of
-the station (`SOURCEID`). This means that complete stations will be
+the station (`SOURCEID`). This means that **complete stations** will be
 either used for training or for validation. This satisfies the
 requirement of [Roberts et al.](#ref-Roberts2017)
-([2017](#ref-Roberts2017)) to predicting to new data or predictor space.
+([2017](#ref-Roberts2017)) for predicting to new data or predictor
+space.
 
 We use the same procedure in `mlr` as in the previous example:
 
@@ -997,7 +1440,7 @@ tsk.st
     ## Supervised task: cookfarm.rm[subs, all.vars(fm)]
     ## Type: regr
     ## Target: VW
-    ## Observations: 5450
+    ## Observations: 5412
     ## Features:
     ##    numerics     factors     ordered functionals 
     ##           9           0           0           0 
@@ -1039,57 +1482,26 @@ summary(eml.VW$learner.model$super.model$learner.model)
     ## 
     ## Residuals:
     ##       Min        1Q    Median        3Q       Max 
-    ## -0.181392 -0.042795  0.002389  0.044552  0.183285 
+    ## -0.179087 -0.044913  0.003077  0.044072  0.182946 
     ## 
     ## Coefficients:
     ##                Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)    0.049382   0.008555   5.772 8.25e-09 ***
-    ## regr.ranger    1.105917   0.027642  40.009  < 2e-16 ***
-    ## regr.gamboost -0.812244   0.070592 -11.506  < 2e-16 ***
-    ## regr.cvglmnet  0.534931   0.052484  10.192  < 2e-16 ***
+    ## (Intercept)    0.022397   0.008316   2.693   0.0071 ** 
+    ## regr.ranger    1.023343   0.028273  36.195   <2e-16 ***
+    ## regr.gamboost -0.652227   0.067587  -9.650   <2e-16 ***
+    ## regr.cvglmnet  0.555138   0.050500  10.993   <2e-16 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 0.06103 on 5446 degrees of freedom
-    ## Multiple R-squared:  0.4296, Adjusted R-squared:  0.4293 
-    ## F-statistic:  1367 on 3 and 5446 DF,  p-value: < 2.2e-16
+    ## Residual standard error: 0.0622 on 5408 degrees of freedom
+    ## Multiple R-squared:  0.411,  Adjusted R-squared:  0.4107 
+    ## F-statistic:  1258 on 3 and 5408 DF,  p-value: < 2.2e-16
 
 This is now a 3D+T model of `VW`, which means that we can use it to
 predict values of `VW` at any new `x,y,d,t` location. To make prediction
-of a specific *slice* we use:
-
-``` r
-cookfarm$weather$Precip_cum <- ave(cookfarm$weather$Precip_wrcc,
-   rev(cumsum(rev(cookfarm$weather$Precip_wrcc)==0)), FUN=cumsum)
-date = as.Date("2012-07-30")
-cday = floor(unclass(date)/86400-.5)
-cdayt = cos((cday-min(cookfarm.rm$cday))*pi/180)
-depth = -0.3
-new.st <- data.frame(cookfarm.grid)
-new.st$Date = date
-new.st$cdayt = cdayt
-new.st$altitude = depth
-new.st = plyr::join(new.st, cookfarm$weather, type="left")
-```
+for a specific *slice* we use:
 
     ## Joining by: Date
-
-``` r
-## predict:
-pr.df = predict(eml.VW, newdata = new.st[,all.vars(fm)[-1]])
-```
-
-    ## Warning in bsplines(mf[[i]], knots = args$knots[[i]]$knots, boundary.knots =
-    ## args$knots[[i]]$boundary.knots, : Some 'x' values are beyond 'boundary.knots';
-    ## Linear extrapolation used.
-
-    ## Warning in bsplines(mf[[i]], knots = args$knots[[i]]$knots, boundary.knots =
-    ## args$knots[[i]]$boundary.knots, : Some 'x' values are beyond 'boundary.knots';
-    ## Linear extrapolation used.
-
-    ## Warning in bsplines(mf[[i]], knots = args$knots[[i]]$knots, boundary.knots =
-    ## args$knots[[i]]$boundary.knots, : Some 'x' values are beyond 'boundary.knots';
-    ## Linear extrapolation used.
 
 To plot prediction together with locations of training points we can
 use:
@@ -1113,7 +1525,7 @@ Predicted soil water content based on spatiotemporal EML.
 We could likewise predict values for longer period (e.g. 100 days) then
 visualize changes using e.g. the `animation` package.
 
-#### Example: Spatiotemporal distribution of Fagus sylvatica
+#### Case study: Spatiotemporal distribution of Fagus sylvatica
 
 In the next example we demonstrate how to fit a spatiotemporal model
 using biological data: occurrences of [*Fagus
@@ -1134,6 +1546,10 @@ library(data.table)
     ## 
     ## Attaching package: 'data.table'
 
+    ## The following objects are masked from 'package:terra':
+    ## 
+    ##     shift, transpose
+
     ## The following object is masked from 'package:raster':
     ## 
     ##     shift
@@ -1151,8 +1567,8 @@ occ.pnts = spTransform(occ.pnts, CRS("+init=epsg:4326"))
 This is a subset of a [larger
 dataset](https://gitlab.com/openlandmap/eu-forest-tree-point-data) that
 has been used to produce predictions of distribution of key forest tree
-species for Europe (<https://maps.opendatascience.eu>). The first
-columns of dataset show:
+species for Europe (you can browse the data via
+<https://maps.opendatascience.eu>). The first columns of dataset show:
 
 ``` r
 head(fs.rm[,1:10])
@@ -1186,8 +1602,8 @@ The header columns are:
 -   `year`: is the year of obsevation;
 -   `postprocess`: column can have value yearly or spacetime to identify
     if the temporal reference of an observation comes from the original
-    dataset or is the result of postprocessing (yearly for originals,
-    spacetime for postprocessed points);  
+    dataset or is the result of post-processing (yearly for originals,
+    spacetime for post-processed points);  
 -   `Tile_ID`: is as extracted from the 30-km tiling system;  
 -   `easting`: is the easting coordinate of the observation point;
 -   `northing`: is the northing coordinate of the observation point;
@@ -1197,8 +1613,9 @@ The header columns are:
     presence point;
 
 Other columns are the EO and ecological covariates that we use for
-modeling distribution of Fagus Sylvatica. We can plot distribution of
-points over EU using:
+modeling distribution of [*Fagus
+sylvatica*](https://www.gbif.org/species/2882316). We can plot
+distribution of points over EU using:
 
 ``` r
 library(rnaturalearth)
@@ -1293,24 +1710,6 @@ landsat images, which is expected:
 
 ``` r
 library(ggplot2)
-```
-
-    ## 
-    ## Attaching package: 'ggplot2'
-
-    ## The following object is masked from 'package:mboost':
-    ## 
-    ##     %+%
-
-    ## The following object is masked from 'package:kernlab':
-    ## 
-    ##     alpha
-
-    ## The following object is masked from 'package:randomForest':
-    ## 
-    ##     margin
-
-``` r
 xl <- as.data.frame(mlr::getFeatureImportance(eml.fs[["learner.model"]][["base.models"]][[1]])$res)
 xl$relative_importance = 100*xl$importance/sum(xl$importance)
 xl = xl[order(xl$relative_importance, decreasing = T),]
@@ -1325,70 +1724,31 @@ ggplot(data = xl[1:20,], aes(x = reorder(variable, relative_importance), y = rel
   theme_bw() + theme(text = element_text(size=15))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-46-1.png)<!-- -->
 
 To produce spacetime predictions for some tiles (120-m spatial
 resolution) we can run:
 
-``` r
-m1 = predict_tiles(input = "9690.2015",  model = eml.fs)
-```
-
     ## [1] "9690 - reading the data"
-
-    ## Warning in dir.create(tmp_folder, recursive = TRUE): 'output//9690' already
-    ## exists
 
     ## Tile 9690 already exists, check date...TRUE
 
     ## [1] "9690 - running predictions"
-
-    ## Warning in if (class(probability_map) == "try-error") {: the condition has
-    ## length > 1 and only the first element will be used
-
     ## [1] "9690 - writing files"
 
-``` r
-m2 = predict_tiles(input = "9690.2017",  model = eml.fs)
-```
-
     ## [1] "9690 - reading the data"
-
-    ## Warning in dir.create(tmp_folder, recursive = TRUE): 'output//9690' already
-    ## exists
 
     ## Tile 9690 already exists, check date...TRUE
 
     ## [1] "9690 - running predictions"
-
-    ## Warning in if (class(probability_map) == "try-error") {: the condition has
-    ## length > 1 and only the first element will be used
-
     ## [1] "9690 - writing files"
 
-``` r
-m3 = predict_tiles(input = "9690.2019",  model = eml.fs)
-```
-
     ## [1] "9690 - reading the data"
-
-    ## Warning in dir.create(tmp_folder, recursive = TRUE): 'output//9690' already
-    ## exists
 
     ## Tile 9690 already exists, check date...TRUE
 
     ## [1] "9690 - running predictions"
-
-    ## Warning in if (class(probability_map) == "try-error") {: the condition has
-    ## length > 1 and only the first element will be used
-
     ## [1] "9690 - writing files"
-
-``` r
-m1$Prob.2015 = m1$Prob
-m1$Prob.2017 = m2$Prob
-m1$Prob.2019 = m3$Prob
-```
 
 We can compare predictions of the probability of occurrence of the
 target species for two years next to each other by using:
@@ -1424,21 +1784,29 @@ distribution of the species can be detected nevertheless.
 In this tutorial we have reviewed some aspects of spatial and
 spatiotemporal data and demonstrated how to use ML, specifically
 Ensemble ML, to train spatiotemporal models and produce time-series of
-predictions. We have also shown using some real-life datasets how
-incorrectly setting up training and cross-validation can lead to
-over-fitting problems.
+predictions. We have also shown, using some synthetic and real-life
+datasets, how incorrectly setting up training and cross-validation can
+lead to over-fitting problems.
 
-We recommend combining and using covariates that can represent long-term
-or accumulated effects of climate, together with covariates that can
-represent daily to monthly oscillation of variables such as soil
-moisture, temperatures and similar. Where time-series EO data exists,
-this can be also incorporated into the mapping algorithm. For spacetime
-overlays we recommend using Cloud-Optimized GeoTIFFs and terra package
-which helps speed up overlay.
+For spatiotemporal models, we recommend combining and using covariates
+that can represent long-term or accumulated effects of climate, together
+with covariates that can represent daily to monthly oscillation of
+variables such as soil moisture, temperatures and similar. During the
+design of the modeling system, we highly recommend first trying to
+understand ecology and processes behind variable of interest. The
+example in [Gasch et al.](#ref-gasch2015spatio)
+([2015](#ref-gasch2015spatio)) shows how in-depth understanding of the
+problem can help design modeling framework and prevent from over-fitting
+problems and similar.
+
+Where time-series EO data exists, this can be also incorporated into the
+mapping algorithm. For spacetime overlays we recommend using
+Cloud-Optimized GeoTIFFs and the `terra` package which helps speed up
+overlay.
 
 Spatiotemporal datasets can be at the order of magnitude larger, hence
 it is important, when implementing analysis of spatiotemporal data, to
-consider computing optimiziation, which typically implies:
+consider computing optimization, which typically implies:
 
 -   Running operations in parallel;
 -   Separating fine-tuning and parameter optimization (best to run on
@@ -1591,6 +1959,14 @@ doi:[10.1111/2041-210X.13650](https://doi.org/10.1111/2041-210X.13650)
 <div id="ref-molnar2020interpretable" class="csl-entry">
 
 Molnar, C. (2020). *Interpretable machine learning*. Lulu.com.
+
+</div>
+
+<div id="ref-pebesma2012spacetime" class="csl-entry">
+
+Pebesma, E., & others. (2012). Spacetime: Spatio-temporal data in r.
+*Journal of Statistical Software*, *51*(7), 1–30. Retrieved from
+<https://www.jstatsoft.org/article/view/v051i07>
 
 </div>
 

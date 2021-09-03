@@ -1,4 +1,39 @@
 
+## spacetime overlay
+extract_st <- function(tif, df, date, date.tif.begin, date.tif.end, coords=c("x","y"), crs, format.date="%Y-%m-%d", variable.name){
+  if(any(!coords %in% colnames(df))){
+    stop(paste("Coordinate columns", coords, "could not be found"))
+  }
+  if(is.character(date) & length(date)==1 & date %in% colnames(df)){
+    date = as.Date(df[,date], format=format.date, origin="1970-01-01")
+  } else {
+    stop(paste("Column name", date, "could not be found in the dataframe"))
+  }
+  if(missing(date.tif.end)){
+    date.tif.end = date.tif.begin
+  }
+  sel <- date <= as.Date(date.tif.end, format=format.date, origin="1970-01-01") & date >= as.Date(date.tif.begin, format=format.date, origin="1970-01-01")
+  if(sum(sel)>0){
+    pnts = as.matrix(df[sel, coords])
+    attr(pnts, "dimnames")[[2]] = c("x","y")
+    df.v = terra::vect(pnts, crs=crs)
+    if(file.exists(tif)){
+      ov = terra::extract(terra::rast(tif), df.v)
+    } else {
+      ov = matrix(nrow=length(df.v), ncol=2)
+    }
+    ov = as.data.frame(ov)
+    if(missing(variable.name)){
+      variable.name = tools::file_path_sans_ext(basename(tif))
+    }
+    names(ov) = c("ID", variable.name)
+    ov$row.id = which(sel)
+    ov$ID = NULL
+    return(ov)
+  }
+}
+
+## Train spacetime model for predicting species occurrences
 train_sp_eml <- function(data, formula, blocking, weights = NULL, out.dir="output/", predict.type = "prob", SL.library=c("classif.ranger","classif.xgboost","classif.glmnet"), super.learner = "classif.logreg", parallel="multicore", num.trees = 85, xyn = c("easting", "northing"), method = "stack.cv"){
 
   tv <- all.vars(formula)[1]
@@ -90,6 +125,7 @@ train_sp_eml <- function(data, formula, blocking, weights = NULL, out.dir="outpu
   return(m)
 }
 
+## Predict tiles generated using "train_sp_eml"
 predict_tiles <- function(input, model, rds.dir="input/", out.dir="output/", time = 10){
 
   tile_id = unlist(strsplit(input, split = '[.]'))[1]
