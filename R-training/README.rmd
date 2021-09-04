@@ -816,7 +816,7 @@ names(x1)  <- basename(sel.tifs1); names(x2) <- basename(sel.tifs2)
 Second, we interpolate values between dates because MODIS images are available 
 only every 8 days:
 
-```{r, echo=FALSE, warning=FALSE}
+```{r, warning=FALSE}
 dates.lst = as.Date("2006-08-13")+1:8
 in.dates = c("2006-08-05", "2006-08-13", "2006-08-21", "2006-08-29")
 in.days = as.numeric(strftime(as.Date(c(in.dates)), format = "%j"))
@@ -873,6 +873,7 @@ spplot(hrpred1km[make.names(paste0("MDTEMP_", dates.lst[c(1,4,8)]))],
       at = seq(143, 239, length.out=17),
       sp.layout = list(st.pts),
       main="Prediction daily temperature")
+#dev.off()
 ```
 
 In summary, this example shows how to fit spatiotemporal EML with using 

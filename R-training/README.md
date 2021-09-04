@@ -4,7 +4,7 @@ using spatiotemporal Ensemble ML
 Created and maintained by: Tom Hengl (<tom.hengl@OpenGeoHub.org>) \|
 Leandro L. Parente (<leandro.parente@OpenGeoHub.org>) \| Carmelo
 Bonannella (<carmelo.bonannella@OpenGeoHub.org>)
-Last compiled on: 03 September, 2021
+Last compiled on: 04 September, 2021
 
 
 
@@ -1282,6 +1282,30 @@ names(x1)  <- basename(sel.tifs1); names(x2) <- basename(sel.tifs2)
 Second, we interpolate values between dates because MODIS images are
 available only every 8 days:
 
+``` r
+dates.lst = as.Date("2006-08-13")+1:8
+in.dates = c("2006-08-05", "2006-08-13", "2006-08-21", "2006-08-29")
+in.days = as.numeric(strftime(as.Date(c(in.dates)), format = "%j"))
+## interpolate values for missing dates in spacetime
+library(parallel)
+cl <- makeCluster(detectCores())
+clusterExport(cl, c("in.days", "dates.lst"))
+t1s = parallel::parApply(cl, x1, 1, 
+      function(y) { try( approx(in.days, as.vector(y), xout=as.numeric(strftime(dates.lst, format = "%j")))$y ) })
+t2s = parallel::parApply(cl, x2, 1, 
+      function(y) { try( approx(in.days, as.vector(y), xout=as.numeric(strftime(dates.lst, format = "%j")))$y ) })
+stopCluster(cl)
+## remove missing pixels
+x.t1s = mclapply(t1s, length, mc.cores = parallel::detectCores())
+t1s[which(!x.t1s==8)] <- list(rep(NA, 8))
+t1s = do.call(rbind.data.frame, t1s)
+names(t1s) = paste0("LST.day_", dates.lst)
+x.t2s = mclapply(t2s, length, mc.cores = parallel::detectCores())
+t2s[which(!x.t2s==8)] <- list(rep(NA, 8))
+t2s = do.call(rbind.data.frame, t2s)
+names(t2s) = paste0("LST.night_", dates.lst)
+```
+
 Now we can make predictions for the target days in August 2006 by using:
 
 ``` r
@@ -1344,6 +1368,10 @@ Predictions spacetime daily temperature for August 2006.
 </p>
 
 </div>
+
+``` r
+#dev.off()
+```
 
 In summary, this example shows how to fit spatiotemporal EML with using
 also seasonality component together with the EO data, and can hence be
