@@ -1,0 +1,28 @@
+project:
+  name: 'Geoharmonizer Land Cover validation'
+  abbrev: 'cz_lc_18'
+  run_id: '20210907'
+
+# land cover & reference definitions 
+input:
+  # raster map 
+  path: ./sample_land_cover
+  in_ras: cz_land_cover_osm_2018.tif
+  ndv: 0
+  legend: legend.yaml
+  # vector reference 
+  in_vec: cz_lucas_points_l1_2018.shp
+  ref_att: 'label_l1'
+
+# validation report settings
+report:
+  path: ./sample_land_cover
+  dir_name: 'lc_2018_validation'
+
+# validation points for GIS exploration 
+validation_points: 
+    file_name: 'validation_points'
+    ogr_format: 'ESRI Shapefile'
+    epsg: 3035 
+
+    
