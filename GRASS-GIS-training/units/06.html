@@ -1,0 +1,299 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>[Part 2] Accessing Sentinel EO data &#8212; ODSE GRASS GIS Workshop in Wageningen 2021</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/gismentors.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="[Part 2] Time series data processing" href="07.html" />
+    <link rel="prev" title="[Part 1] Raster processing" href="05.html" /> 
+  </head><body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="../index.html">ODSE GRASS GIS Workshop in Wageningen 2021</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="05.html" title="[Part 1] Raster processing"
+             accesskey="P">previous</a> |
+          <a href="07.html" title="[Part 2] Time series data processing"
+             accesskey="N">next</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="part-2-accessing-sentinel-eo-data">
+<h1>[Part 2] Accessing Sentinel EO data<a class="headerlink" href="#part-2-accessing-sentinel-eo-data" title="Permalink to this headline">¶</a></h1>
+<p>There are plenty of libraries or tools which allow downloading
+Sentinel products from <a class="reference external" href="https://scihub.copernicus.eu/">Copernicus Open Access Hub</a>.</p>
+<p>For GRASS GIS there is the <a class="reference external" href="http://grass.osgeo.org/grass79/manuals/addons/i.sentinel.html">i.sentinel</a> toolbox.
+It consists of six GRASS addon modules:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="http://grass.osgeo.org/grass79/manuals/addons/i.sentinel.download.html">i.sentinel.download</a></p></li>
+<li><p><a class="reference external" href="http://grass.osgeo.org/grass79/manuals/addons/i.sentinel.import.html">i.sentinel.import</a></p></li>
+<li><p><a class="reference external" href="http://grass.osgeo.org/grass79/manuals/addons/i.sentinel.preproc.html">i.sentinel.preproc</a></p></li>
+<li><p><a class="reference external" href="http://grass.osgeo.org/grass79/manuals/addons/i.sentinel.mask.html">i.sentinel.mask</a></p></li>
+<li><p><a class="reference external" href="http://grass.osgeo.org/grass79/manuals/addons/i.sentinel.coverage.html">i.sentinel.coverage</a></p></li>
+<li><p><a class="reference external" href="http://grass.osgeo.org/grass79/manuals/addons/i.sentinel.parallel.download.html">i.sentinel.parallel.download</a></p></li>
+</ul>
+<p>Addons modules can be easily installed via <a class="reference external" href="http://grass.osgeo.org/grass79/manuals/g.extension.html">g.extension</a>
+(<span class="menuselection">Settings ‣ Addons extensions ‣ Install extension
+from addons</span>).</p>
+<div class="figure align-center" id="id1">
+<img alt="../_images/g-extension.png" src="../_images/g-extension.png" />
+<p class="caption"><span class="caption-number">Fig. 42 </span><span class="caption-text">Install <a class="reference external" href="http://grass.osgeo.org/grass79/manuals/addons/i.sentinel.html">i.sentinel</a> GRASS Addon.</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>g.extension <span class="nv">extension</span><span class="o">=</span>i.sentinel
+</pre></div>
+</div>
+<p>Note that <a class="reference external" href="http://grass.osgeo.org/grass79/manuals/addons/i.sentinel.download.html">i.sentinel.download</a> requires also
+<a class="reference external" href="https://pypi.python.org/pypi/sentinelsat">sentinelsat library</a> to
+be installed.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Sentinelsat library can be easily installed from the
+<span class="item">Console</span> tab by entering the command below.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 -m pip install sentinelsat
+</pre></div>
+</div>
+</div>
+<div class="section" id="download-data">
+<h2>Download data<a class="headerlink" href="#download-data" title="Permalink to this headline">¶</a></h2>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Pre-downloaded Sentinel scenes are available in the <a class="reference external" href="https://geo.fsv.cvut.cz/geoharmonizer/odse_workshop_2021/t34sgh_20_60m.zip">sample
+dataset</a>. Participants
+can continue with <a class="reference internal" href="#sentinel-import"><span class="std std-ref">importing sample data</span></a>.</p>
+</div>
+<p>Let’s download suitable Sentinel products for our area of interest
+(AOI) and perform the NDVI calculation. AOI region is defined by
+<span class="map">tile_5606_1km</span> created in <a class="reference internal" href="05.html"><span class="doc">[Part 1] Raster processing</span></a>.</p>
+<p><a class="reference external" href="https://www.sentinel-hub.com/blog/sentinel-2-l2a-products-available-sentinel-hub">Sentinel-2 L2A products</a>
+will be used to avoid computing atmospheric corrections. Let’s
+search for the latest available product by means of
+<a class="reference external" href="http://grass.osgeo.org/grass79/manuals/i.sentinel.download.html">i.sentinel.download</a>. Setting the <span class="param">-l</span> flag, the result will only
+be printed. The download procedure will be performed later. In order to
+search and download Sentinel products from the Copernicus Open Access Hub,
+you have to create an account first. See the manual page of
+<a class="reference external" href="http://grass.osgeo.org/grass79/manuals/i.sentinel.download.html">i.sentinel.download</a> module for details. Create a new text
+file <code class="file docutils literal notranslate"><span class="pre">sentinel.txt</span></code> containing two lines (username and
+password).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To get username and password you need to register at the
+<a class="reference external" href="https://scihub.copernicus.eu/">Copernicus Open Access Hub</a>,
+see <a class="reference external" href="https://scihub.copernicus.eu/dhus/#/self-registration">Register new account</a>
+page for signing up.</p>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>i.sentinel.download -l <span class="nv">map</span><span class="o">=</span>tile_5606_1km <span class="nv">producttype</span><span class="o">=</span>S2MSI2A <span class="nv">settings</span><span class="o">=</span>sentinel.txt
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">24</span> <span class="n">Sentinel</span> <span class="n">product</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="n">found</span>
+<span class="mi">99389</span><span class="n">c4b</span><span class="o">-</span><span class="mi">65</span><span class="n">d8</span><span class="o">-</span><span class="mi">40</span><span class="n">ce</span><span class="o">-</span><span class="n">b32b</span><span class="o">-</span><span class="mi">91</span><span class="n">cd42dba4af</span> <span class="o">...</span> <span class="mi">2021</span><span class="o">-</span><span class="mi">07</span><span class="o">-</span><span class="mi">29</span><span class="n">T09</span><span class="p">:</span><span class="mi">05</span><span class="p">:</span><span class="mi">59</span><span class="n">Z</span>  <span class="mi">0</span><span class="o">%</span> <span class="n">S2MSI2A</span>
+<span class="mi">118</span><span class="n">b5ede</span><span class="o">-</span><span class="mi">78</span><span class="n">d6</span><span class="o">-</span><span class="mi">4</span><span class="n">ccf</span><span class="o">-</span><span class="mi">8</span><span class="n">c7e</span><span class="o">-</span><span class="n">bd3b83f0a4e8</span> <span class="o">...</span> <span class="mi">2021</span><span class="o">-</span><span class="mi">07</span><span class="o">-</span><span class="mi">29</span><span class="n">T09</span><span class="p">:</span><span class="mi">05</span><span class="p">:</span><span class="mi">59</span><span class="n">Z</span>  <span class="mi">0</span><span class="o">%</span> <span class="n">S2MSI2A</span>
+<span class="n">dc2fcffa</span><span class="o">-</span><span class="n">da81</span><span class="o">-</span><span class="mi">4</span><span class="n">bfe</span><span class="o">-</span><span class="n">bb99</span><span class="o">-</span><span class="mi">88</span><span class="n">cc8dde1ea7</span> <span class="o">...</span> <span class="mi">2021</span><span class="o">-</span><span class="mi">08</span><span class="o">-</span><span class="mi">03</span><span class="n">T09</span><span class="p">:</span><span class="mi">06</span><span class="p">:</span><span class="mi">01</span><span class="n">Z</span>  <span class="mi">1</span><span class="o">%</span> <span class="n">S2MSI2A</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>By default the module returns products for the last 60 days. Let’s change
+the search period setting <span class="param">start</span> and <span class="param">end</span> options. We will also
+limit products by <span class="param">clouds</span> coverage percentage threshold and <span class="param">sort</span>
+products by ingestion date.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>i.sentinel.download -l <span class="nv">map</span><span class="o">=</span>tile_5606_1km <span class="nv">producttype</span><span class="o">=</span>S2MSI2A <span class="nv">settings</span><span class="o">=</span>sentinel.txt <span class="se">\</span>
+<span class="nv">start</span><span class="o">=</span><span class="m">2021</span>-04-01 <span class="nv">end</span><span class="o">=</span><span class="m">2021</span>-08-31 <span class="nv">clouds</span><span class="o">=</span><span class="m">5</span> <span class="nv">sort</span><span class="o">=</span>ingestiondate
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">26</span> <span class="n">Sentinel</span> <span class="n">product</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="n">found</span>
+<span class="mf">901763e0</span><span class="o">-</span><span class="n">f592</span><span class="o">-</span><span class="mi">4</span><span class="n">eb8</span><span class="o">-</span><span class="mi">8</span><span class="n">f51</span><span class="o">-</span><span class="mi">036</span><span class="n">ee2fa5665</span> <span class="o">...</span> <span class="mi">2021</span><span class="o">-</span><span class="mi">04</span><span class="o">-</span><span class="mi">30</span><span class="n">T09</span><span class="p">:</span><span class="mi">05</span><span class="p">:</span><span class="mi">49</span><span class="n">Z</span>  <span class="mi">4</span><span class="o">%</span> <span class="n">S2MSI2A</span>
+<span class="n">ab66170a</span><span class="o">-</span><span class="n">f2d5</span><span class="o">-</span><span class="mi">4</span><span class="n">d21</span><span class="o">-</span><span class="n">a0ce</span><span class="o">-</span><span class="mi">5412</span><span class="n">a0043fd3</span> <span class="o">...</span> <span class="mi">2021</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">10</span><span class="n">T09</span><span class="p">:</span><span class="mi">05</span><span class="p">:</span><span class="mi">49</span><span class="n">Z</span>  <span class="mi">1</span><span class="o">%</span> <span class="n">S2MSI2A</span>
+<span class="mi">431</span><span class="n">da3a0</span><span class="o">-</span><span class="mi">56</span><span class="n">d2</span><span class="o">-</span><span class="mi">452</span><span class="n">c</span><span class="o">-</span><span class="n">bb0f</span><span class="o">-</span><span class="mi">8</span><span class="n">d05b55969a9</span> <span class="o">...</span> <span class="mi">2021</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">10</span><span class="n">T09</span><span class="p">:</span><span class="mi">05</span><span class="p">:</span><span class="mi">49</span><span class="n">Z</span>  <span class="mi">1</span><span class="o">%</span> <span class="n">S2MSI2A</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>If more products have been found, you can limit the amount with
+the <span class="param">limit</span> option.</p>
+</div>
+<p>Let’s download the desired product(s). Just remove the <span class="param">-l</span> flag and
+add the <span class="param">output</span> option in order to define the path to the output directory
+where data should be saved.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>i.sentinel.download <span class="nv">map</span><span class="o">=</span>tile_5606_1km <span class="nv">producttype</span><span class="o">=</span>S2MSI2A <span class="nv">settings</span><span class="o">=</span>sentinel.txt <span class="se">\</span>
+<span class="nv">start</span><span class="o">=</span><span class="m">2021</span>-04-01 <span class="nv">end</span><span class="o">=</span><span class="m">2021</span>-08-31 <span class="nv">clouds</span><span class="o">=</span><span class="m">5</span> <span class="se">\</span>
+<span class="nv">output</span><span class="o">=</span>/data/sentinel
+</pre></div>
+</div>
+</div>
+<div class="section" id="import-data">
+<h2>Import data<a class="headerlink" href="#import-data" title="Permalink to this headline">¶</a></h2>
+<p id="sentinel-import">Before importing or linking Sentinel data try to print a list of
+filtered raster files including projection match (second column, 1 for
+match otherwise 0). If the CRS of input data differs from the current location
+consider reprojection (<span class="param">-r</span>) or creating a new location for
+import.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>To avoid re-projecting Sentinel data we will create a
+new location (see <a class="reference internal" href="02.html#create-location"><span class="std std-ref">Create a new location</span></a>) defined by <a class="reference external" href="http://epsg.io/32634">EPSG:32634</a>.</p>
+</div>
+<div class="figure align-center" id="id2">
+<img alt="../_images/sentinel-new-loc.png" src="../_images/sentinel-new-loc.png" />
+<p class="caption"><span class="caption-number">Fig. 43 </span><span class="caption-text">New location <em>odse_sentinel_2021</em>.</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+</div>
+<p>Data will be imported into the new location by means of the
+<a class="reference external" href="http://grass.osgeo.org/grass79/manuals/addons/i.sentinel.import.html">i.sentinel.import</a> tool. The command will import
+<strong>all</strong> Sentinel bands from <span class="param">input</span> directory
+recursively. Before importing data let’s check content of the input
+directory by <span class="param">-p</span> flag.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>i.sentinel.import -p <span class="nv">input</span><span class="o">=</span>/home/odse/Downloads/t34sgh_20_60m
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">.../</span><span class="n">R20m</span><span class="o">/</span><span class="n">T34SGH_20210828T090549_B03_20m</span><span class="o">.</span><span class="n">jp2</span> <span class="mi">0</span> <span class="p">(</span><span class="n">EPSG</span><span class="p">:</span> <span class="mi">32634</span><span class="p">)</span>
+<span class="o">.../</span><span class="n">R20m</span><span class="o">/</span><span class="n">T34SGH_20210828T090549_B04_20m</span><span class="o">.</span><span class="n">jp2</span> <span class="mi">0</span> <span class="p">(</span><span class="n">EPSG</span><span class="p">:</span> <span class="mi">32634</span><span class="p">)</span>
+<span class="o">.../</span><span class="n">R20m</span><span class="o">/</span><span class="n">T34SGH_20210828T090549_B8A_20m</span><span class="o">.</span><span class="n">jp2</span> <span class="mi">0</span> <span class="p">(</span><span class="n">EPSG</span><span class="p">:</span> <span class="mi">32634</span><span class="p">)</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>In the example below, the import procedure will be limited to the 4th and
+8th bands in 20m spatial resolution by <span class="param">pattern</span> option.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>i.sentinel.import -p <span class="nv">input</span><span class="o">=</span>/home/odse/Downloads/t34sgh_20_60m <span class="nv">pattern</span><span class="o">=</span><span class="s2">&quot;B(04|8A)_20m&quot;</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">.../</span><span class="n">R20m</span><span class="o">/</span><span class="n">T34SGH_20210828T090549_B8A_20m</span><span class="o">.</span><span class="n">jp2</span> <span class="mi">0</span> <span class="p">(</span><span class="n">EPSG</span><span class="p">:</span> <span class="mi">32634</span><span class="p">)</span>
+<span class="o">.../</span><span class="n">R20m</span><span class="o">/</span><span class="n">T34SGH_20210828T090549_B04_20m</span><span class="o">.</span><span class="n">jp2</span> <span class="mi">0</span> <span class="p">(</span><span class="n">EPSG</span><span class="p">:</span> <span class="mi">32634</span><span class="p">)</span>
+<span class="o">.../</span><span class="n">R20m</span><span class="o">/</span><span class="n">T34SGH_20210624T090601_B04_20m</span><span class="o">.</span><span class="n">jp2</span> <span class="mi">0</span> <span class="p">(</span><span class="n">EPSG</span><span class="p">:</span> <span class="mi">32634</span><span class="p">)</span>
+<span class="o">.../</span><span class="n">R20m</span><span class="o">/</span><span class="n">T34SGH_20210624T090601_B8A_20m</span><span class="o">.</span><span class="n">jp2</span> <span class="mi">0</span> <span class="p">(</span><span class="n">EPSG</span><span class="p">:</span> <span class="mi">32634</span><span class="p">)</span>
+<span class="o">.../</span><span class="n">R20m</span><span class="o">/</span><span class="n">T34SGH_20210729T090559_B04_20m</span><span class="o">.</span><span class="n">jp2</span> <span class="mi">0</span> <span class="p">(</span><span class="n">EPSG</span><span class="p">:</span> <span class="mi">32634</span><span class="p">)</span>
+<span class="o">.../</span><span class="n">R20m</span><span class="o">/</span><span class="n">T34SGH_20210729T090559_B8A_20m</span><span class="o">.</span><span class="n">jp2</span> <span class="mi">0</span> <span class="p">(</span><span class="n">EPSG</span><span class="p">:</span> <span class="mi">32634</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>By default, input data are imported into GRASS data format.
+Alternatively, data can be linked if <span class="param">-l</span> is given. It is also
+useful to import cloud mask vector features by <span class="param">-c</span> flag. We also use
+<span class="param">register_output</span> option to produce a timestamp plain text file
+which will be used in <a class="reference internal" href="07.html"><span class="doc">[Part 2] Time series data processing</span></a>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>i.sentinel.import -l -c <span class="nv">input</span><span class="o">=</span>/home/odse/Downloads/t34sgh_20_60m <span class="nv">pattern</span><span class="o">=</span><span class="s2">&quot;B(04|8A)_20m&quot;</span> <span class="se">\</span>
+<span class="nv">register_output</span><span class="o">=</span>/home/odse/sentinel-timestamps.txt
+</pre></div>
+</div>
+<p>Lets copy our AOI (<span class="map">tile_5606_1km</span>) from <em>odse_workshop_2021</em>
+location to the current one (see <a class="reference internal" href="03.html#copy-map"><span class="std std-ref">[Part 1] Data Management</span></a>).</p>
+<div class="figure align-center" id="id3">
+<img alt="../_images/display-band-4.png" class="large" src="../_images/display-band-4.png" />
+<p class="caption"><span class="caption-number">Fig. 44 </span><span class="caption-text">Visualization of 4th band. <a class="reference internal" href="04.html#color-table"><span class="std std-ref">Color table</span></a> set to
+<code class="docutils literal notranslate"><span class="pre">grey.eq</span></code> (don’t forget to set up the computational region!)</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
+</div>
+</div>
+<div class="section" id="computing-ndvi">
+<h2>Computing NDVI<a class="headerlink" href="#computing-ndvi" title="Permalink to this headline">¶</a></h2>
+<p>To compute <a class="reference external" href="http://en.wikipedia.org/wiki/NDVI">NDVI</a>, the red (VIS) and near-infrared (NIR)
+channels are required. In the case of Sentinel-2, these are the 4th and
+8th band, respectively.</p>
+<div class="math notranslate nohighlight">
+\[NDVI = (NIR - VIS) / (NIR  + VIS)\]</div>
+<p>Before computing, let’s set up the computational region based on the whole
+Sentinel scene.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>g.region <span class="nv">raster</span><span class="o">=</span>T34SGH_20210624T090601_B04_20m
+</pre></div>
+</div>
+<p>NDVI can be computed via the <a class="reference external" href="http://grass.osgeo.org/grass79/manuals/i.vi.html">i.vi</a> tool which allows computing
+various vegetation indices.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>i.vi <span class="nv">red</span><span class="o">=</span>T34SGH_20210624T090601_B04_20m <span class="nv">output</span><span class="o">=</span>ndvi <span class="nv">viname</span><span class="o">=</span>ndvi <span class="nv">nir</span><span class="o">=</span>T34SGH_20210624T090601_B8A_20m
+</pre></div>
+</div>
+<p>Let’s mask cloudy areas with a mask created by
+<a class="reference external" href="http://grass.osgeo.org/grass79/manuals/addons/i.sentinel.import.html">i.sentinel.import</a>. Note that masking, as other raster
+processing, is performed only within the current computational region,
+see <a class="reference internal" href="04.html"><span class="doc">[Part 1] Modules, Region</span></a>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>r.mask <span class="nv">vector</span><span class="o">=</span>T34SGH_20210624T090601_MSK_CLOUDS -i
+</pre></div>
+</div>
+<div class="figure align-center" id="id4">
+<img alt="../_images/ndvi-legend.png" class="middle" src="../_images/ndvi-legend.png" />
+<p class="caption"><span class="caption-number">Fig. 45 </span><span class="caption-text">Final NDVI product with cloud mask applied and a legend.</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
+</div>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          
+          <h3>Table of Contents</h3>
+          <ul>
+<li class="toctree-l1"><a class="reference internal" href="01.html">[Part 1] About GRASS GIS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02.html">[Part 1] First steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03.html">[Part 1] Data Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04.html">[Part 1] Modules, Region</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05.html">[Part 1] Raster processing</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">[Part 2] Accessing Sentinel EO data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#download-data">Download data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#import-data">Import data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#computing-ndvi">Computing NDVI</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="07.html">[Part 2] Time series data processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="08.html">[Part 2] Temporal Framework Python API</a></li>
+</ul>
+
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="../search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+            </form>
+          </div>
+
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="05.html" title="[Part 1] Raster processing"
+              >previous</a> |
+            <a href="07.html" title="[Part 2] Time series data processing"
+              >next</a>
+          </div>
+          <div role="note" aria-label="source link">
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021 CTU GeoForAll Lab.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.3.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>

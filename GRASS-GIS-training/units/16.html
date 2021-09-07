@@ -1,0 +1,173 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Unit 16 - Flooding simulation &#8212; ODSE GRASS GIS Workshop in Wageningen 2021</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/gismentors.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="../index.html">ODSE GRASS GIS Workshop in Wageningen 2021</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="unit-16-flooding-simulation">
+<h1>Unit 16 - Flooding simulation<a class="headerlink" href="#unit-16-flooding-simulation" title="Permalink to this headline">¶</a></h1>
+<p>Beside DTM (see <a class="reference internal" href="15.html"><span class="doc">Unit 15 - DTM reprojection</span></a>) also river streams are required. Such data
+can be downloaded from OSM database similarly as done in <a class="reference internal" href="02.html"><span class="doc">[Part 1] First steps</span></a>
+in the case of Jena city region.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span>[bbox:50.85374080,11.50084754,50.98991003,11.67463202];
+(
+way
+[&quot;waterway&quot;=&quot;river&quot;];
+way
+[&quot;waterway&quot;=&quot;stream&quot;]
+);
+/*added by auto repair*/
+(._;&gt;;);
+/*end of auto repair*/
+out;
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ogr2ogr -f GPKG jena_rivers.gpkg -a_srs EPSG:4326 -t_srs EPSG:32632 /vsicurl_streaming/<span class="s2">&quot;\</span>
+<span class="s2">http://overpass-api.de/api/interpreter?data=%5Bbbox%3A50%2E85374080%2C11%2E50084754%2C50%2\</span>
+<span class="s2">E98991003%2C11%2E67463202%5D%3B%28way%5B%22waterway%22%3D%22river%22%5D%3Bway%5B%22waterway\</span>
+<span class="s2">%22%3D%22stream%22%5D%3B%29%3B%28%2E%5F%3B%3E%3B%29%3Bout%3B%0A&quot;</span> lines
+</pre></div>
+</div>
+</div>
+<p>For simplification data is available from
+<code class="file docutils literal notranslate"><span class="pre">geodata/osm/jena-rivers.gpkg</span></code>.</p>
+<div class="figure align-center" id="id1">
+<img alt="../_images/jena-rivers.png" class="large" src="../_images/jena-rivers.png" />
+<p class="caption"><span class="caption-text">DTM, Jena boundary and rivers provided by OSM.</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</div>
+<p>Flooding can be easily simulated by <a class="reference external" href="http://grass.osgeo.org/grass78/manuals/r.lake.html">r.lake</a> module which
+fills a lake to a target water level from a given start point or seed
+raster. The resulting raster map contains cells with values
+representing lake depth (NULL for all other cells beyond the lake).</p>
+<p>The <a class="reference external" href="http://grass.osgeo.org/grass78/manuals/r.lake.html">r.lake</a> requires seeds coordinates and water level. The
+coordinates can be set also interactively as <code class="xref std std-numref docutils literal notranslate"><span class="pre">r-lake-coord</span></code>
+shows.</p>
+<div class="figure align-center" id="id2">
+<span id="r-lake-coord"></span><img alt="../_images/r-lake-coords.svg" class="large" src="../_images/r-lake-coords.svg" /><p class="caption"><span class="caption-text">Set seed coordinates interactively from map display.</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+</div>
+<p>Height of seed point can be determined by querying DTM map layer, see
+<code class="xref std std-numref docutils literal notranslate"><span class="pre">dem-what</span></code> or directly using <a class="reference external" href="http://grass.osgeo.org/grass78/manuals/r.what.html">r.what</a> module, see
+example below.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>r.what <span class="nv">map</span><span class="o">=</span>dem <span class="nv">coordinates</span><span class="o">=</span><span class="m">681734</span>,5644423
+</pre></div>
+</div>
+<div class="figure align-center" id="id3">
+<span id="dem-what"></span><img alt="../_images/dem-what.svg" src="../_images/dem-what.svg" /><p class="caption"><span class="caption-text">Query DTM layer for elevation value.</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
+</div>
+<div class="admonition important" id="create-mapset">
+<p class="admonition-title">Important</p>
+<p>Before running <a class="reference external" href="http://grass.osgeo.org/grass78/manuals/r.lake.html">r.lake</a> let’s start
+organizing our work! Till now we used PERMANENT mapsets only. There
+is input data like DTM, Jena city region, cloud mask vector map,
+Sentinel bands, results of NDVI computation and so on. Data
+organization can be improved by creating different mapsets. Let’s
+create a new mapset <em>flooding</em> in the current location <em>jena-region</em>. New
+mapset can be created by <a class="reference external" href="http://grass.osgeo.org/grass78/manuals/g.mapset.html">g.mapset</a>
+(<span class="menuselection">Settings ‣ GRASS working environment ‣ Create
+new mapset</span>).</p>
+</div>
+<p>Before computation the computation region have to be set, eg. based on
+<span class="map">dem</span> raster map.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>g.region <span class="nv">raster</span><span class="o">=</span>dem
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>r.lake <span class="nv">elevation</span><span class="o">=</span>dem <span class="nv">water_level</span><span class="o">=</span><span class="m">150</span> <span class="nv">lake</span><span class="o">=</span>lake <span class="nv">coordinates</span><span class="o">=</span><span class="m">681734</span>,5644423
+</pre></div>
+</div>
+<div class="figure align-center" id="id4">
+<img alt="../_images/r-lake-150.png" src="../_images/r-lake-150.png" />
+<p class="caption"><span class="caption-text">Flooding simulation on water level 150m, OSM WMS as basemap.</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
+</div>
+<div class="figure align-center" id="id5">
+<img alt="../_images/r-lake-150-3d.png" src="../_images/r-lake-150-3d.png" />
+<p class="caption"><span class="caption-text">Flooding similation in 3D view.</span><a class="headerlink" href="#id5" title="Permalink to this image">¶</a></p>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          
+          <h3>Table of Contents</h3>
+          <ul>
+<li class="toctree-l1"><a class="reference internal" href="01.html">[Part 1] About GRASS GIS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02.html">[Part 1] First steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03.html">[Part 1] Data Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04.html">[Part 1] Modules, Region</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05.html">[Part 1] Raster processing</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="20.html">[Part 2] Accessing Sentinel EO data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="21.html">[Part 2] Time series data processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="22.html">[Part 2] Temporal Framework Python API</a></li>
+</ul>
+
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="../search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+            </form>
+          </div>
+
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+          </div>
+          <div role="note" aria-label="source link">
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021 Martin Landa.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.3.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>

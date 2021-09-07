@@ -1,0 +1,292 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Unit 29 - PyWPS LST region stats &#8212; ODSE GRASS GIS Workshop in Wageningen 2021</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/gismentors.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="../index.html">ODSE GRASS GIS Workshop in Wageningen 2021</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="unit-29-pywps-lst-region-stats">
+<h1>Unit 29 - PyWPS LST region stats<a class="headerlink" href="#unit-29-pywps-lst-region-stats" title="Permalink to this headline">¶</a></h1>
+<p>A third version of the process will return LST statistics for region
+in Germany defined by input vector data. Input region is imported by
+<a class="reference external" href="http://grass.osgeo.org/grass78/manuals/v.import.html">v.import</a> (line <span class="lcode">62</span>), resultant statistics is
+computed by <a class="reference external" href="http://grass.osgeo.org/grass78/manuals/t.rast.series.html">t.rast.series</a> (line <span class="lcode">68</span>) and
+<a class="reference external" href="http://grass.osgeo.org/grass78/manuals/r.univar.html">r.univar</a> (line <span class="lcode">78</span>).</p>
+<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="kn">from</span> <span class="nn">pywps</span> <span class="kn">import</span> <span class="n">Process</span><span class="p">,</span> <span class="n">LiteralInput</span><span class="p">,</span> <span class="n">LiteralOutput</span><span class="p">,</span> <span class="n">ComplexInput</span><span class="p">,</span> <span class="n">ComplexOutput</span><span class="p">,</span> <span class="n">Format</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Martin Landa&#39;</span>
+
+<span class="k">class</span> <span class="nc">ModisV3</span><span class="p">(</span><span class="n">Process</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="hll">        <span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">ComplexInput</span><span class="p">(</span><span class="s1">&#39;region&#39;</span><span class="p">,</span> <span class="s1">&#39;Input vector region&#39;</span><span class="p">,</span>
+</span>                               <span class="n">supported_formats</span><span class="o">=</span><span class="p">[</span>
+                                   <span class="n">Format</span><span class="p">(</span><span class="s1">&#39;text/xml&#39;</span><span class="p">),</span> <span class="c1"># requires QGIS WPS client</span>
+                                   <span class="n">Format</span><span class="p">(</span><span class="s1">&#39;application/gml+xml&#39;</span><span class="p">)]),</span>
+                  <span class="n">LiteralInput</span><span class="p">(</span><span class="s1">&#39;start&#39;</span><span class="p">,</span> <span class="s1">&#39;Start date (eg. 2019-03-01)&#39;</span><span class="p">,</span>
+                               <span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;string&#39;</span><span class="p">),</span>
+                  <span class="n">LiteralInput</span><span class="p">(</span><span class="s1">&#39;end&#39;</span><span class="p">,</span> <span class="s1">&#39;End date (eg. 2019-04-01)&#39;</span><span class="p">,</span>
+                               <span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;string&#39;</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">ComplexOutput</span><span class="p">(</span><span class="s1">&#39;stats&#39;</span><span class="p">,</span> <span class="s1">&#39;Computed LST statistics&#39;</span><span class="p">,</span>
+                                 <span class="n">supported_formats</span><span class="o">=</span><span class="p">[</span><span class="n">Format</span><span class="p">(</span><span class="s1">&#39;application/json&#39;</span><span class="p">)])</span>
+        <span class="p">]</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">ModisV3</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_handler</span><span class="p">,</span>
+            <span class="n">identifier</span><span class="o">=</span><span class="s1">&#39;modis-v3&#39;</span><span class="p">,</span>
+            <span class="n">version</span><span class="o">=</span><span class="s1">&#39;0.3&#39;</span><span class="p">,</span>
+            <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Modis process (v3)&quot;</span><span class="p">,</span>
+            <span class="n">abstract</span><span class="o">=</span><span class="s1">&#39;The process uses the GRASS GIS to compute LST &#39;</span> \
+            <span class="s1">&#39;statistics for given period in 2019 for Germany&#39;</span><span class="p">,</span>
+            <span class="n">profile</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+            <span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span>
+            <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">,</span>
+            <span class="n">store_supported</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">status_supported</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">grass_location</span><span class="o">=</span><span class="s2">&quot;/home/user/grassdata/germany-modis&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">check_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">date_str</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+
+        <span class="n">d</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">date_str</span><span class="p">,</span> <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">year</span> <span class="o">!=</span> <span class="mi">2019</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Only year 2019 allowed&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">subprocess</span> <span class="kn">import</span> <span class="n">PIPE</span>
+
+        <span class="kn">import</span> <span class="nn">grass.script</span> <span class="k">as</span> <span class="nn">gs</span>
+        <span class="kn">from</span> <span class="nn">grass.pygrass.modules</span> <span class="kn">import</span> <span class="n">Module</span>
+        <span class="kn">from</span> <span class="nn">grass.exceptions</span> <span class="kn">import</span> <span class="n">CalledModuleError</span>
+        
+        <span class="n">start</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;start&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;end&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_date</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_date</span><span class="p">(</span><span class="n">end</span><span class="p">)</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="s1">&#39;modis_pywps&#39;</span>
+        
+        <span class="c1"># be silent</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;GRASS_VERBOSE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
+
+<span class="hll">        <span class="n">Module</span><span class="p">(</span><span class="s1">&#39;v.import&#39;</span><span class="p">,</span>
+</span>               <span class="nb">input</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;region&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">file</span><span class="p">,</span>
+               <span class="n">output</span><span class="o">=</span><span class="s1">&#39;poly&#39;</span><span class="p">)</span>
+        <span class="n">Module</span><span class="p">(</span><span class="s1">&#39;g.region&#39;</span><span class="p">,</span> <span class="n">vector</span><span class="o">=</span><span class="s1">&#39;poly&#39;</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="s1">&#39;c_001&#39;</span><span class="p">)</span>
+        <span class="n">Module</span><span class="p">(</span><span class="s1">&#39;r.mask&#39;</span><span class="p">,</span> <span class="n">vector</span><span class="o">=</span><span class="s1">&#39;poly&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+<span class="hll">            <span class="n">Module</span><span class="p">(</span><span class="s1">&#39;t.rast.series&#39;</span><span class="p">,</span>
+</span>                   <span class="nb">input</span><span class="o">=</span><span class="s1">&#39;modis_c@PERMANENT&#39;</span><span class="p">,</span>
+                   <span class="n">output</span><span class="o">=</span><span class="n">output</span><span class="p">,</span>
+                   <span class="n">method</span><span class="o">=</span><span class="s1">&#39;average&#39;</span><span class="p">,</span>
+                   <span class="n">where</span><span class="o">=</span><span class="s2">&quot;start_time &gt; &#39;</span><span class="si">{start}</span><span class="s2">&#39; and start_time &lt; &#39;</span><span class="si">{end}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                       <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span>
+            <span class="p">))</span>
+        <span class="k">except</span> <span class="n">CalledModuleError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Unable to compute statistics&#39;</span><span class="p">)</span>
+
+<span class="hll">        <span class="n">ret</span> <span class="o">=</span> <span class="n">Module</span><span class="p">(</span><span class="s1">&#39;r.univar&#39;</span><span class="p">,</span>
+</span>                     <span class="n">flags</span><span class="o">=</span><span class="s1">&#39;g&#39;</span><span class="p">,</span>
+                     <span class="nb">map</span><span class="o">=</span><span class="n">output</span><span class="p">,</span>
+                     <span class="n">stdout_</span><span class="o">=</span><span class="n">PIPE</span>
+        <span class="p">)</span>
+
+        <span class="n">stats</span> <span class="o">=</span> <span class="n">gs</span><span class="o">.</span><span class="n">parse_key_val</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+        <span class="c1"># cast dict values to float</span>
+        <span class="n">stats</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">stats</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">stats</span><span class="o">.</span><span class="n">values</span><span class="p">()]))</span>
+
+        <span class="n">response</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;stats&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">stats</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">response</span>
+</pre></div>
+</td></tr></table></div>
+<p>Sample process to download: <a class="reference external" href="../_static/scripts/modis_v3.py">modis_v3.py</a></p>
+<p>Do not forget to import process as done in <a class="reference internal" href="27.html#process-import"><span class="std std-ref">Unit 27</span></a> and restart demo PyWPS server.</p>
+<p>Copy <code class="file docutils literal notranslate"><span class="pre">jena-boundary.gpkg</span></code> to <code class="file docutils literal notranslate"><span class="pre">pywps-flask/static/data</span></code> and
+execute the process.</p>
+<p><a class="reference external" href="http://localhost:5000/wps?request=Execute&amp;service=WPS&amp;identifier=modis-v3&amp;version=1.0.0&amp;datainputs=start=2019-03-01;end=2019-04-01;region=&#64;xlink:href=http://localhost:5000/static/data/jena_boundary.gpkg">http://localhost:5000/wps?request=Execute&amp;service=WPS&amp;identifier=modis-v3&amp;version=1.0.0&amp;datainputs=start=2019-03-01;end=2019-04-01;region=&#64;xlink:href=http://localhost:5000/static/data/jena_boundary.gpkg</a></p>
+<p>Possible response.</p>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;wps:ComplexData</span> <span class="na">mimeType=</span><span class="s">&quot;application/json&quot;</span> <span class="na">encoding=</span><span class="s">&quot;&quot;</span> <span class="na">schema=</span><span class="s">&quot;&quot;</span><span class="nt">&gt;</span>
+{&quot;n&quot;: 115.0, &quot;null_cells&quot;: 109.0, &quot;cells&quot;: 224.0, &quot;min&quot;: 7.07625000000003,...
+<span class="nt">&lt;/wps:ComplexData&gt;</span>
+</pre></div>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          
+          <h3>Table of Contents</h3>
+          <ul>
+<li class="toctree-l1"><a class="reference internal" href="01.html">[Part 1] About GRASS GIS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02.html">[Part 1] First steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03.html">[Part 1] Data Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04.html">[Part 1] Modules, Region</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05.html">[Part 1] Raster processing</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="20.html">[Part 2] Accessing Sentinel EO data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="21.html">[Part 2] Time series data processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="22.html">[Part 2] Temporal Framework Python API</a></li>
+</ul>
+
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="../search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+            </form>
+          </div>
+
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+          </div>
+          <div role="note" aria-label="source link">
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021 Martin Landa.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.3.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>
