@@ -1,0 +1,228 @@
+[Part 2] Accessing Sentinel EO data
+===================================
+
+There are plenty of libraries or tools which allow downloading
+Sentinel products from `Copernicus Open Access Hub
+<https://scihub.copernicus.eu/>`__.
+
+For GRASS GIS there is the :grasscmdaddons:`i.sentinel` toolbox.
+It consists of six GRASS addon modules:
+
+* :grasscmdaddons:`i.sentinel.download`
+* :grasscmdaddons:`i.sentinel.import`
+* :grasscmdaddons:`i.sentinel.preproc`
+* :grasscmdaddons:`i.sentinel.mask`
+* :grasscmdaddons:`i.sentinel.coverage`
+* :grasscmdaddons:`i.sentinel.parallel.download`
+  
+Addons modules can be easily installed via :grasscmd:`g.extension`
+(:menuselection:`Settings --> Addons extensions --> Install extension
+from addons`).
+
+.. figure:: ../images/units/06/g-extension.png
+
+   Install :grasscmdaddons:`i.sentinel` GRASS Addon.
+
+.. code-block:: bash
+
+   g.extension extension=i.sentinel
+   
+Note that :grasscmdaddons:`i.sentinel.download` requires also
+`sentinelsat library <https://pypi.python.org/pypi/sentinelsat>`__ to
+be installed.
+
+.. note:: Sentinelsat library can be easily installed from the
+   :item:`Console` tab by entering the command below.
+   
+   .. code-block:: bash
+	
+      python3 -m pip install sentinelsat
+
+Download data
+-------------
+
+.. important:: Pre-downloaded Sentinel scenes are available in the `sample
+   dataset
+   <https://geo.fsv.cvut.cz/geoharmonizer/odse_workshop_2021/t34sgh_20_60m.zip>`__. Participants
+   can continue with :ref:`importing sample data <sentinel-import>`.
+
+Let's download suitable Sentinel products for our area of interest
+(AOI) and perform the NDVI calculation. AOI region is defined by
+:map:`tile_5606_1km` created in :doc:`05`.
+
+`Sentinel-2 L2A products
+<https://www.sentinel-hub.com/blog/sentinel-2-l2a-products-available-sentinel-hub>`__
+will be used to avoid computing atmospheric corrections. Let's
+search for the latest available product by means of
+:grasscmd:`i.sentinel.download`. Setting the :param:`-l` flag, the result will only
+be printed. The download procedure will be performed later. In order to
+search and download Sentinel products from the Copernicus Open Access Hub, 
+you have to create an account first. See the manual page of
+:grasscmd:`i.sentinel.download` module for details. Create a new text
+file :file:`sentinel.txt` containing two lines (username and
+password).
+
+.. note::
+   To get username and password you need to register at the 
+   `Copernicus Open Access Hub <https://scihub.copernicus.eu/>`__,
+   see `Register new account <https://scihub.copernicus.eu/dhus/#/self-registration>`__
+   page for signing up.
+
+.. code-block:: bash
+
+   i.sentinel.download -l map=tile_5606_1km producttype=S2MSI2A settings=sentinel.txt
+
+::
+
+   24 Sentinel product(s) found
+   99389c4b-65d8-40ce-b32b-91cd42dba4af ... 2021-07-29T09:05:59Z  0% S2MSI2A
+   118b5ede-78d6-4ccf-8c7e-bd3b83f0a4e8 ... 2021-07-29T09:05:59Z  0% S2MSI2A
+   dc2fcffa-da81-4bfe-bb99-88cc8dde1ea7 ... 2021-08-03T09:06:01Z  1% S2MSI2A
+   ...
+
+By default the module returns products for the last 60 days. Let's change
+the search period setting :param:`start` and :param:`end` options. We will also
+limit products by :param:`clouds` coverage percentage threshold and :param:`sort`
+products by ingestion date.
+       
+.. code-block:: bash
+                
+   i.sentinel.download -l map=tile_5606_1km producttype=S2MSI2A settings=sentinel.txt \
+   start=2021-04-01 end=2021-08-31 clouds=5 sort=ingestiondate
+
+::
+
+   26 Sentinel product(s) found
+   901763e0-f592-4eb8-8f51-036ee2fa5665 ... 2021-04-30T09:05:49Z  4% S2MSI2A
+   ab66170a-f2d5-4d21-a0ce-5412a0043fd3 ... 2021-05-10T09:05:49Z  1% S2MSI2A
+   431da3a0-56d2-452c-bb0f-8d05b55969a9 ... 2021-05-10T09:05:49Z  1% S2MSI2A
+   ...
+   
+.. tip:: If more products have been found, you can limit the amount with
+   the :param:`limit` option.
+
+Let's download the desired product(s). Just remove the :param:`-l` flag and
+add the :param:`output` option in order to define the path to the output directory
+where data should be saved.
+
+.. code-block:: bash
+
+   i.sentinel.download map=tile_5606_1km producttype=S2MSI2A settings=sentinel.txt \
+   start=2021-04-01 end=2021-08-31 clouds=5 \
+   output=/data/sentinel
+
+Import data
+-----------
+
+.. _sentinel-import:
+
+Before importing or linking Sentinel data try to print a list of
+filtered raster files including projection match (second column, 1 for
+match otherwise 0). If the CRS of input data differs from the current location
+consider reprojection (:param:`-r`) or creating a new location for
+import.
+
+.. important:: To avoid re-projecting Sentinel data we will create a
+   new location (see :ref:`create-location`) defined by :epsg:`32634`.
+
+.. figure:: ../images/units/06/sentinel-new-loc.png
+
+   New location *odse_sentinel_2021*.
+
+Data will be imported into the new location by means of the
+:grasscmdaddons:`i.sentinel.import` tool. The command will import
+**all** Sentinel bands from :param:`input` directory
+recursively. Before importing data let's check content of the input
+directory by :param:`-p` flag.
+
+.. code-block:: bash
+ 
+   i.sentinel.import -p input=/home/odse/Downloads/t34sgh_20_60m 
+
+::
+
+   .../R20m/T34SGH_20210828T090549_B03_20m.jp2 0 (EPSG: 32634)
+   .../R20m/T34SGH_20210828T090549_B04_20m.jp2 0 (EPSG: 32634)
+   .../R20m/T34SGH_20210828T090549_B8A_20m.jp2 0 (EPSG: 32634)
+   ...
+      
+In the example below, the import procedure will be limited to the 4th and 
+8th bands in 20m spatial resolution by :param:`pattern` option.
+
+.. code-block:: bash
+ 
+   i.sentinel.import -p input=/home/odse/Downloads/t34sgh_20_60m pattern="B(04|8A)_20m"
+
+::
+   
+   .../R20m/T34SGH_20210828T090549_B8A_20m.jp2 0 (EPSG: 32634)
+   .../R20m/T34SGH_20210828T090549_B04_20m.jp2 0 (EPSG: 32634)
+   .../R20m/T34SGH_20210624T090601_B04_20m.jp2 0 (EPSG: 32634)
+   .../R20m/T34SGH_20210624T090601_B8A_20m.jp2 0 (EPSG: 32634)
+   .../R20m/T34SGH_20210729T090559_B04_20m.jp2 0 (EPSG: 32634)
+   .../R20m/T34SGH_20210729T090559_B8A_20m.jp2 0 (EPSG: 32634)
+
+By default, input data are imported into GRASS data format.
+Alternatively, data can be linked if :param:`-l` is given. It is also
+useful to import cloud mask vector features by :param:`-c` flag. We also use 
+:param:`register_output` option to produce a timestamp plain text file 
+which will be used in :doc:`07`.
+
+.. code-block:: bash
+
+   i.sentinel.import -l -c input=/home/odse/Downloads/t34sgh_20_60m pattern="B(04|8A)_20m" \
+   register_output=/home/odse/sentinel-timestamps.txt
+
+Lets copy our AOI (:map:`tile_5606_1km`) from *odse_workshop_2021*
+location to the current one (see :ref:`[Part 1] Data Management
+<copy-map>`).
+
+.. figure:: ../images/units/06/display-band-4.png
+   :class: large
+           
+   Visualization of 4th band. :ref:`Color table <color-table>` set to
+   ``grey.eq`` (don't forget to set up the computational region!)
+   
+Computing NDVI
+--------------
+
+To compute :wikipedia:`NDVI`, the red (VIS) and near-infrared (NIR)
+channels are required. In the case of Sentinel-2, these are the 4th and
+8th band, respectively.
+
+.. math::
+        
+   NDVI = (NIR - VIS) / (NIR  + VIS)
+
+Before computing, let's set up the computational region based on the whole
+Sentinel scene.
+
+.. code-block:: bash
+
+   g.region raster=T34SGH_20210624T090601_B04_20m
+
+NDVI can be computed via the :grasscmd:`i.vi` tool which allows computing
+various vegetation indices.
+
+.. code-block:: bash
+
+   i.vi red=T34SGH_20210624T090601_B04_20m output=ndvi viname=ndvi nir=T34SGH_20210624T090601_B8A_20m
+
+Let's mask cloudy areas with a mask created by
+:grasscmdaddons:`i.sentinel.import`. Note that masking, as other raster
+processing, is performed only within the current computational region,
+see :doc:`04`.
+
+..
+   .. figure:: ../images/units/05/r-mask.png
+
+      Creating mask from an input vector map.
+   
+.. code-block:: bash
+
+   r.mask vector=T34SGH_20210624T090601_MSK_CLOUDS -i
+   
+.. figure:: ../images/units/06/ndvi-legend.png
+   :class: middle
+           
+   Final NDVI product with cloud mask applied and a legend.

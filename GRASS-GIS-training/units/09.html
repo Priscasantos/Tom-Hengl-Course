@@ -1,0 +1,245 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Unit 09 - Model tuning &#8212; ODSE GRASS GIS Workshop in Wageningen 2021</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/gismentors.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="../index.html">ODSE GRASS GIS Workshop in Wageningen 2021</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="unit-09-model-tuning">
+<h1>Unit 09 - Model tuning<a class="headerlink" href="#unit-09-model-tuning" title="Permalink to this headline">¶</a></h1>
+<p>Let’s improve our NDVI model created in <a class="reference internal" href="08.html"><span class="doc">Unit 08 - Modeler</span></a>. Current model
+operates in a current computation region, it would be better to define
+region based on user input. Then NDVI would be computed only within
+user defined area.</p>
+<p>NDVI values range from +1.0 to -1.0. Areas of barren rock, sand, or
+snow usually show very low NDVI values (for example, 0.1 or
+less). Sparse vegetation such as shrubs and grasslands or senescing
+crops may result in moderate NDVI values (approximately 0.2 to
+0.5). High NDVI values (approximately 0.6 to 0.9) correspond to dense
+vegetation such as that found in temperate and tropical forests or
+crops at their peak growth stage. Let’s classify NDVI into 3 major
+classes:</p>
+<ul class="simple">
+<li><p>Class 1: from -1.0 to 0.2</p></li>
+<li><p>Class 2: from 0.2 to 0.6</p></li>
+<li><p>Class 3: from 0.6 to 1.0</p></li>
+</ul>
+<p>The desired output will be a vector map with NDVI classes. Let’s also
+eliminate too small areas.</p>
+<p>From GRASS perspective a computation will be performed by several steps/modules:</p>
+<ol class="arabic simple">
+<li><p>Erase cloud mask in input region (<a class="reference external" href="http://grass.osgeo.org/grass78/manuals/v.overlay.html">v.overlay</a>: <code class="docutils literal notranslate"><span class="pre">not</span></code> operator)</p></li>
+<li><p>Set computation region based on modified input region (<a class="reference external" href="http://grass.osgeo.org/grass78/manuals/g.region.html">g.region</a>)</p></li>
+<li><p>Set mask (<a class="reference external" href="http://grass.osgeo.org/grass78/manuals/r.mask.html">r.mask</a>)</p></li>
+<li><p>Compute NDVI values (<a class="reference external" href="http://grass.osgeo.org/grass78/manuals/i.vi.html">i.vi</a>)</p></li>
+<li><p>Reclassify NDVI values into classes (<a class="reference external" href="http://grass.osgeo.org/grass78/manuals/r.recode.html">r.recode</a>)</p></li>
+<li><p>Set a reasonable color table for raster map classes (<a class="reference external" href="http://grass.osgeo.org/grass78/manuals/r.colors.html">r.colors</a>)</p></li>
+<li><p>Convert raster classes into vector areas (<a class="reference external" href="http://grass.osgeo.org/grass78/manuals/r.to.vect.html">r.to.vect</a>)</p></li>
+<li><p>Remove small areas (join them with adjacent areas by <a class="reference external" href="http://grass.osgeo.org/grass78/manuals/v.clean.html">v.clean</a>)</p></li>
+</ol>
+<p>Overview of commands below:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>v.overlay <span class="nv">ainput</span><span class="o">=</span>jena_region <span class="nv">binput</span><span class="o">=</span>MaskFeature <span class="nv">operator</span><span class="o">=</span>not <span class="nv">output</span><span class="o">=</span>region_mask
+g.region <span class="nv">vector</span><span class="o">=</span>region_mask <span class="nv">align</span><span class="o">=</span>L2A_T32UPB_20170706T102021_B04_10m
+r.mask <span class="nv">vector</span><span class="o">=</span>region_mask
+i.vi <span class="nv">red</span><span class="o">=</span>L2A_T32UPB_20170706T102021_B04_10m <span class="nv">output</span><span class="o">=</span>ndvi <span class="nv">nir</span><span class="o">=</span>L2A_T32UPB_20170706T102021_B08_10m
+r.recode <span class="nv">input</span><span class="o">=</span>ndvi <span class="nv">output</span><span class="o">=</span>ndvi_class <span class="nv">rules</span><span class="o">=</span>reclass.txt
+r.colors <span class="nv">map</span><span class="o">=</span>ndvi_class <span class="nv">rules</span><span class="o">=</span>colors.txt
+r.to.vect -s -v <span class="nv">input</span><span class="o">=</span>ndvi_class <span class="nv">output</span><span class="o">=</span>ndvi_class <span class="nv">type</span><span class="o">=</span>area
+v.clean <span class="nv">input</span><span class="o">=</span>ndvi_class <span class="nv">output</span><span class="o">=</span>ndvi_vector <span class="nv">tool</span><span class="o">=</span>rmarea <span class="nv">threshold</span><span class="o">=</span><span class="m">1600</span>
+</pre></div>
+</div>
+<p>The modules can be added to the existing model by <a class="reference internal" href="../_images/module-add.png"><img alt="grass-module-add" src="../_images/module-add.png" style="width: 1.5em;" /></a>
+<sup>Add command (GRASS module) to the model</sup>. Note that new commands
+are added to the end of a computation workflow which is not
+desired. Commands (items in model terminology) can be reorder in
+<span class="item">Items</span> tab.</p>
+<div class="figure align-center" id="id1">
+<img alt="../_images/reorder-items.png" src="../_images/reorder-items.png" />
+<p class="caption"><span class="caption-text">Reorder model items (commands). In this case move
+<a class="reference external" href="http://grass.osgeo.org/grass78/manuals/v.overlay.html">v.overlay</a> up to the first position.</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Be aware of correct computation region, don’t forget to align region
+bounds to input raster data (<a class="reference external" href="http://grass.osgeo.org/grass78/manuals/g.region.html">g.region</a> with an <span class="param">align</span>
+option).</p>
+</div>
+<p>Reclassification of floating point raster maps can be done by
+<a class="reference external" href="http://grass.osgeo.org/grass78/manuals/r.recode.html">r.recode</a>. An example of reclassification table:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>-1:0.2:1
+<span class="m">0</span>.2:0.6:2
+<span class="m">0</span>.6:1:3
+</pre></div>
+</div>
+<p>Beside predefined color tables <a class="reference external" href="http://grass.osgeo.org/grass78/manuals/r.colors.html">r.colors</a> (see
+<a class="reference internal" href="04.html#color-table"><span class="std std-ref">Color table</span></a> section) also allows to use user-defined color
+table by <span class="param">rules</span> option. In our case a color table can be quite
+simple:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="m">1</span> grey
+<span class="m">2</span> yellow
+<span class="m">3</span> green
+</pre></div>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Reclassification and color table is recommended to be stored into
+files otherwise it can be lost when opening model next time:
+<a class="reference external" href="../_static/models/reclass.txt">reclass.txt</a> and <a class="reference external" href="../_static/models/colors.txt">colors.txt</a></p>
+</div>
+<div class="figure align-center" id="id2">
+<img alt="../_images/model-v2.png" src="../_images/model-v2.png" />
+<p class="caption"><span class="caption-text">Extended model.</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+</div>
+<p>Sample model to download: <a class="reference external" href="../_static/models/ndvi-v2.gxm">ndvi-v2.gxm</a>
+(note: don’t forget to fix path to reclass and colors file for
+<a class="reference external" href="http://grass.osgeo.org/grass78/manuals/r.recode.html">r.recode</a> and <a class="reference external" href="http://grass.osgeo.org/grass78/manuals/r.colors.html">r.colors</a> modules)</p>
+<div class="section" id="parameterization">
+<h2>Parameterization<a class="headerlink" href="#parameterization" title="Permalink to this headline">¶</a></h2>
+<p>Our models have all parameters hard-coded, there is nothing which can be
+influenced by a user when launching the model.</p>
+<p>In Graphical Modeler an user input can be defined by two mechanisms:</p>
+<ul class="simple">
+<li><p><strong>parametrization</strong> of module options</p></li>
+<li><p>using self-defined <strong>variables</strong> (ideal when more modules are sharing
+the same user-defined input value)</p></li>
+</ul>
+<p>Let’s start with parametrization of module options. Change the model
+in order to provide the user ability to:</p>
+<ul class="simple">
+<li><p>define own area of interest (<span class="param">ainput</span> option in
+<a class="reference external" href="http://grass.osgeo.org/grass78/manuals/v.overlay.html">v.overlay</a>)</p></li>
+<li><p>set threshold for small areas (<span class="param">threshold</span> option in
+<a class="reference external" href="http://grass.osgeo.org/grass78/manuals/v.clean.html">v.clean</a>)</p></li>
+</ul>
+<p>To parameterize a command open its properties dialog. Option
+parametrization is enabled by <span class="item">Parameterized in model</span> checkbox
+as shown below.</p>
+<div class="figure align-center" id="id3">
+<img alt="../_images/parametrize-cmd.svg" src="../_images/parametrize-cmd.svg" /><p class="caption"><span class="caption-text">Parametrization of <span class="param">ainput</span> option for <a class="reference external" href="http://grass.osgeo.org/grass78/manuals/v.overlay.html">v.overlay</a>
+command.</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Parameterized commands are highlighted in the model by bold
+border.</p>
+</div>
+<p>After pressing <a class="reference internal" href="../_images/execute.png"><img alt="grass-execute" src="../_images/execute.png" style="width: 1.5em;" /></a> <sup>Run model</sup> the model is not run
+automatically. Instead of that a GUI dialog is shown to allow entering
+user-defined parameters.</p>
+<div class="figure align-center" id="id4">
+<img alt="../_images/model-params.png" src="../_images/model-params.png" />
+<p class="caption"><span class="caption-text">Parameterized options are organized into tabs based on the modules.</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
+</div>
+<p>After setting the input parameters the model can be <span class="item">Run</span>.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Saved models can be run directly from Layer Manager
+<span class="menuselection">File ‣ Run model</span> without opening Graphical Model
+itself.</p>
+</div>
+<p>Let’s test our model with different settings…</p>
+<div class="figure align-center" id="id5">
+<img alt="../_images/ndvi-no-reduction.png" src="../_images/ndvi-no-reduction.png" />
+<p class="caption"><span class="caption-text">NDVI vector class without small area reduction.</span><a class="headerlink" href="#id5" title="Permalink to this image">¶</a></p>
+</div>
+<div class="figure align-center" id="id6">
+<img alt="../_images/ndvi-2000m2.png" src="../_images/ndvi-2000m2.png" />
+<p class="caption"><span class="caption-text">NDVI classes smaller than 2000m <sup>2</sup> (so 20 pixel) removed.</span><a class="headerlink" href="#id6" title="Permalink to this image">¶</a></p>
+</div>
+<p>Let’s change a computation region, eg. by buffering Jena city region
+(<a class="reference external" href="http://grass.osgeo.org/grass78/manuals/v.buffer.html">v.buffer</a>).</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>v.buffer <span class="nv">input</span><span class="o">=</span>jena_boundary <span class="nv">output</span><span class="o">=</span>jena_boundary_5km <span class="nv">distance</span><span class="o">=</span><span class="m">5000</span>
+</pre></div>
+</div>
+<div class="figure align-center" id="id7">
+<img alt="../_images/ndvi-jena-5km.png" class="middle" src="../_images/ndvi-jena-5km.png" />
+<p class="caption"><span class="caption-text">NDVI vector classes computed in 5km buffer around Jena city region.</span><a class="headerlink" href="#id7" title="Permalink to this image">¶</a></p>
+</div>
+<p>Sample model to download: <a class="reference external" href="../_static/models/ndvi-v3.gxm">ndvi-v3.gxm</a></p>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          
+          <h3>Table of Contents</h3>
+          <ul>
+<li class="toctree-l1"><a class="reference internal" href="01.html">[Part 1] About GRASS GIS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02.html">[Part 1] First steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03.html">[Part 1] Data Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04.html">[Part 1] Modules, Region</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05.html">[Part 1] Raster processing</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="20.html">[Part 2] Accessing Sentinel EO data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="21.html">[Part 2] Time series data processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="22.html">[Part 2] Temporal Framework Python API</a></li>
+</ul>
+
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="../search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+            </form>
+          </div>
+
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+          </div>
+          <div role="note" aria-label="source link">
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021 Martin Landa.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.3.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>

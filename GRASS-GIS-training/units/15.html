@@ -1,0 +1,195 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Unit 15 - DTM reprojection &#8212; ODSE GRASS GIS Workshop in Wageningen 2021</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/gismentors.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="../index.html">ODSE GRASS GIS Workshop in Wageningen 2021</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="unit-15-dtm-reprojection">
+<h1>Unit 15 - DTM reprojection<a class="headerlink" href="#unit-15-dtm-reprojection" title="Permalink to this headline">¶</a></h1>
+<p>In this unit EU-DEM global dataset provided by <a class="reference external" href="https://www.eea.europa.eu/data-and-maps/data/copernicus-land-monitoring-service-eu-dem#tab-gis-data">Copernicus programme</a>
+will be used. Jena region is covered by tile E40N30. Be aware that
+EU-DEM tiles covers large regions (4GB per tile).</p>
+<p>Normally <a class="reference external" href="http://grass.osgeo.org/grass78/manuals/r.import.html">r.import</a> could be used to import and
+automatically reproject data into target location. In this case there
+is no need to import into GRASS a whole big DEM tile. By using <code class="docutils literal notranslate"><span class="pre">-r</span></code>
+flag of <a class="reference external" href="http://grass.osgeo.org/grass78/manuals/r.in.gdal.html">r.in.gdal</a> GRASS module only a subregion covering
+AOI could be imported. Unfortunately <a class="reference external" href="http://grass.osgeo.org/grass78/manuals/r.import.html">r.import</a> do not offer
+such flag. In this unit manual reprojection will be presented. A new
+location for imported data (<a class="reference external" href="http://epsg.io/4258">EPSG:4258</a>) must be created and data
+reprojected into target <em>jena-region</em> (<a class="reference external" href="http://epsg.io/32632">EPSG:32632</a>) location manually.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In order to save space of disk the original EU-DEM tile was
+clipped by larger region than Jena AOI. Modified tile is available
+from <code class="file docutils literal notranslate"><span class="pre">geodata/eu-dem</span></code> directory.</p>
+</div>
+<div class="section" id="create-location-for-data-import">
+<h2>Create location for data import<a class="headerlink" href="#create-location-for-data-import" title="Permalink to this headline">¶</a></h2>
+<p>EU-DEM dataset is provided in ETRS-89 (<a class="reference external" href="http://epsg.io/4258">EPSG:4258</a>). Start a new
+GRASS session and create a new location <em>jena-eu-dem</em> based on input
+<code class="file docutils literal notranslate"><span class="pre">geodata/eu-dem/dem_sample.tif</span></code> data (similarly as done in
+<a class="reference internal" href="02.html#create-location"><span class="std std-ref">Unit 02</span></a>). Skip data import provided by
+location wizard since only subregion defined by Jena city region is
+planned to be imported.</p>
+<div class="figure align-center" id="id1">
+<img alt="../_images/create-location-01.png" src="../_images/create-location-01.png" />
+<p class="caption"><span class="caption-text">Define name for a new location.</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</div>
+<p>Location will be created based on input sample DEM file (<em>Read
+projection and datum terms from a georeferenced data file</em>).</p>
+<div class="figure align-center" id="id2">
+<img alt="../_images/create-location-11.png" src="../_images/create-location-11.png" />
+<p class="caption"><span class="caption-text">Create a new location based on a sample DEM file.</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+</div>
+<div class="figure align-center" id="id3">
+<img alt="../_images/create-location-2.svg" src="../_images/create-location-2.svg" /><p class="caption"><span class="caption-text">Don’t import input data from Location Wizard.</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
+</div>
+<p>Enter new location (PERMANENT mapset) and reproject Jena region vector
+map by <a class="reference external" href="http://grass.osgeo.org/grass78/manuals/v.proj.html">v.proj</a> (<span class="menuselection">Vector ‣ Develop vector
+map ‣ Reproject vector map from different GRASS location</span>) or simply
+from <span class="item">Data</span> tab in Layer Manager just by copying and pasting the
+maps, see <code class="xref std std-numref docutils literal notranslate"><span class="pre">data-reproject-fig</span></code>.</p>
+<div class="figure align-center" id="id4">
+<span id="data-reproject-fig"></span><img alt="../_images/data-reproject.png" src="../_images/data-reproject.png" />
+<p class="caption"><span class="caption-text">Easy and quick way to reproject (copy-and-paste) raster or vector
+maps across locations from <span class="item">Data</span> tab in Layer Manager.</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>v.proj <span class="nv">location</span><span class="o">=</span>jena-region <span class="nv">mapset</span><span class="o">=</span>PERMANENT <span class="nv">input</span><span class="o">=</span>jena_boundary
+</pre></div>
+</div>
+<p>Before importing DEM set computation region extent based on
+reprojected Jena city region.</p>
+<div class="figure align-center" id="id5">
+<img alt="../_images/region-extent.png" class="large" src="../_images/region-extent.png" />
+<p class="caption"><span class="caption-text">Set computational region extent based on Jena city region.</span><a class="headerlink" href="#id5" title="Permalink to this image">¶</a></p>
+</div>
+<p>Launch <a class="reference external" href="http://grass.osgeo.org/grass78/manuals/r.in.gdal.html">r.in.gdal</a> (<span class="menuselection">File ‣ Import raster
+data ‣ Import of common raster formats</span>) to import DEM tile, don’t
+forget to enable <code class="xref std std-option docutils literal notranslate"><span class="pre">-r</span></code> flag.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>r.in.gdal -r <span class="nv">input</span><span class="o">=</span>/home/user/geodata/eu-dem/dem_sample.tif <span class="nv">output</span><span class="o">=</span>dem
+</pre></div>
+</div>
+<div class="figure align-center" id="id6">
+<img alt="../_images/dem-imported.png" class="large" src="../_images/dem-imported.png" />
+<p class="caption"><span class="caption-text">Imported DEM limited to current region extent. Displayed with
+<code class="docutils literal notranslate"><span class="pre">elevation</span></code> color table.</span><a class="headerlink" href="#id6" title="Permalink to this image">¶</a></p>
+</div>
+</div>
+<div class="section" id="reproject-dem-into-target-location">
+<h2>Reproject DEM into target location<a class="headerlink" href="#reproject-dem-into-target-location" title="Permalink to this headline">¶</a></h2>
+<p>Now switch back to <em>jena-region</em> location (<span class="menuselection">Settings
+‣ GRASS working environment ‣ Change location and mapset</span>).</p>
+<div class="figure align-center" id="id7">
+<img alt="../_images/switch-location.png" class="small" src="../_images/switch-location.png" />
+<p class="caption"><span class="caption-text">Switch GRASS to jena-region location and PERMANENT mapset.</span><a class="headerlink" href="#id7" title="Permalink to this image">¶</a></p>
+</div>
+<p>Reproject DEM from <em>jena-eu-dem</em> location by <a class="reference external" href="http://grass.osgeo.org/grass78/manuals/r.proj.html">r.proj</a>
+(<span class="menuselection">Raster ‣ Develop raster map ‣ Reproject raster
+map from different GRASS location</span>) or directly from <span class="item">Data</span> tab
+in Layer Manager. Set desired resolution (25m) and choose appropriate
+resampling method (in our case <em>bilinear</em>).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If a mask is enabled, it’s good idea to remove it before
+importing.</p>
+</div>
+<div class="figure align-center" id="id8">
+<img alt="../_images/data-reproject-raster.png" class="small" src="../_images/data-reproject-raster.png" />
+<p class="caption"><span class="caption-text">Reproject raster data in Layer Manager.</span><a class="headerlink" href="#id8" title="Permalink to this image">¶</a></p>
+</div>
+<p>Example of reprojecting raster data using <a class="reference external" href="http://grass.osgeo.org/grass78/manuals/r.proj.html">r.proj</a> command
+below.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>r.proj <span class="nv">location</span><span class="o">=</span>jena-eu-dem <span class="nv">mapset</span><span class="o">=</span>PERMANENT <span class="nv">input</span><span class="o">=</span>dem <span class="nv">method</span><span class="o">=</span>bilinear <span class="nv">resolution</span><span class="o">=</span><span class="m">25</span>
+</pre></div>
+</div>
+<div class="figure align-center" id="id9">
+<img alt="../_images/dem-3d.svg" class="large" src="../_images/dem-3d.svg" /><p class="caption"><span class="caption-text">DTM in 3D view.</span><a class="headerlink" href="#id9" title="Permalink to this image">¶</a></p>
+</div>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          
+          <h3>Table of Contents</h3>
+          <ul>
+<li class="toctree-l1"><a class="reference internal" href="01.html">[Part 1] About GRASS GIS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02.html">[Part 1] First steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03.html">[Part 1] Data Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04.html">[Part 1] Modules, Region</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05.html">[Part 1] Raster processing</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="20.html">[Part 2] Accessing Sentinel EO data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="21.html">[Part 2] Time series data processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="22.html">[Part 2] Temporal Framework Python API</a></li>
+</ul>
+
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="../search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+            </form>
+          </div>
+
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+          </div>
+          <div role="note" aria-label="source link">
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021 Martin Landa.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.3.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>

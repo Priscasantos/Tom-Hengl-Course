@@ -1,0 +1,380 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Unit 19 - DTM script parallelization &#8212; ODSE GRASS GIS Workshop in Wageningen 2021</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/gismentors.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="../index.html">ODSE GRASS GIS Workshop in Wageningen 2021</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="unit-19-dtm-script-parallelization">
+<h1>Unit 19 - DTM script parallelization<a class="headerlink" href="#unit-19-dtm-script-parallelization" title="Permalink to this headline">¶</a></h1>
+<p>This unit is focused on <strong>computing parallelization</strong>. Sample script
+below produces seamless DTM (Digital Terrain Model, see <a class="reference internal" href="18.html"><span class="doc">Unit 18 - Lidar, DTM interpolation</span></a>)
+from bunch of LAS/LAZ files. Computation will be split into tiles and
+performed in parallel.</p>
+<div class="section" id="dtm-interpolation-in-parallel">
+<h2>DTM interpolation in parallel<a class="headerlink" href="#dtm-interpolation-in-parallel" title="Permalink to this headline">¶</a></h2>
+<p>User interface contains two major parameters, <span class="param">directory</span> (line
+<span class="lcode">6</span>) for input directory with input LAS/LAZ files, and
+<span class="param">elevation</span> (line <span class="lcode">9</span>) name for output elevation raster
+map mosaics. The resolution of output DTM is defined by
+<span class="param">resolution</span> parameter (line <span class="lcode">13</span>). And finally number
+of processes running in parallel will be controlled by <span class="param">nproc</span>
+(line <span class="lcode">18</span>) parameter.</p>
+<p>A script consists of three main functions:</p>
+<p>1. <code class="docutils literal notranslate"><span class="pre">import_files()</span></code> to import input LAS/LAZ files (line
+<span class="lcode">33</span>). Import process can be done in parallel by
+<a class="reference external" href="http://grass.osgeo.org/grass78/manuals/libpython/pygrass.modules.interface.html#pygrass.modules.interface.module.ParallelModuleQueue">ParallelModuleQueue</a> from PyGRASS library (see
+<a class="reference internal" href="11.html"><span class="doc">Unit 11 - PyGRASS scripting</span></a> for PyGRASS introduction), lines <span class="lcode">37, 42, 57-58, 60</span>.</p>
+<p>2. <code class="docutils literal notranslate"><span class="pre">create_dtm_tiles()</span></code> to compute DTM per tile (line <span class="lcode">67</span>)
+using <a class="reference external" href="http://grass.osgeo.org/grass78/manuals/v.surf.rst.html">v.surf.rst</a>. DTM tiles need to be computed with a
+reasonable overlap in order to create seamless mosaics, see
+<span class="lcode">73-76</span>. Tiles can be processed in parallel too, see
+<span class="param">nproc</span> option on line <span class="lcode">82</span>.</p>
+<p>3. <code class="docutils literal notranslate"><span class="pre">patch_tiles()</span></code> to patch DTM tiles together by
+<a class="reference external" href="http://grass.osgeo.org/grass78/manuals/r.series.html">r.series</a>, see <span class="lcode">86</span>. From overlapping cell values is
+computed an average value. This is main reason why <a class="reference external" href="http://grass.osgeo.org/grass78/manuals/r.patch.html">r.patch</a>
+is not used here.</p>
+<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>  1
+  2
+  3
+  4
+  5
+  6
+  7
+  8
+  9
+ 10
+ 11
+ 12
+ 13
+ 14
+ 15
+ 16
+ 17
+ 18
+ 19
+ 20
+ 21
+ 22
+ 23
+ 24
+ 25
+ 26
+ 27
+ 28
+ 29
+ 30
+ 31
+ 32
+ 33
+ 34
+ 35
+ 36
+ 37
+ 38
+ 39
+ 40
+ 41
+ 42
+ 43
+ 44
+ 45
+ 46
+ 47
+ 48
+ 49
+ 50
+ 51
+ 52
+ 53
+ 54
+ 55
+ 56
+ 57
+ 58
+ 59
+ 60
+ 61
+ 62
+ 63
+ 64
+ 65
+ 66
+ 67
+ 68
+ 69
+ 70
+ 71
+ 72
+ 73
+ 74
+ 75
+ 76
+ 77
+ 78
+ 79
+ 80
+ 81
+ 82
+ 83
+ 84
+ 85
+ 86
+ 87
+ 88
+ 89
+ 90
+ 91
+ 92
+ 93
+ 94
+ 95
+ 96
+ 97
+ 98
+ 99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="c1">#%module</span>
+<span class="c1">#% description: Creates DTM from input LAS tiles.</span>
+<span class="c1">#%end</span>
+<span class="hll"><span class="c1">#%option G_OPT_M_DIR</span>
+</span><span class="c1">#% required: yes</span>
+<span class="c1">#%end</span>
+<span class="hll"><span class="c1">#%option G_OPT_R_ELEV</span>
+</span><span class="c1">#% description: Name for output elevation raster map mosaics</span>
+<span class="c1">#%end</span>
+<span class="c1">#%option</span>
+<span class="hll"><span class="c1">#% key: resolution</span>
+</span><span class="c1">#% description: Output resolution</span>
+<span class="c1">#% type: double</span>
+<span class="c1">#%end</span>
+<span class="c1">#%option</span>
+<span class="hll"><span class="c1">#% key: nprocs</span>
+</span><span class="c1">#% description: Number of processes per tile</span>
+<span class="c1">#% answer: 1</span>
+<span class="c1">#% type: integer</span>
+<span class="c1">#%end</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+
+<span class="kn">import</span> <span class="nn">grass.script</span> <span class="k">as</span> <span class="nn">gs</span>
+
+<span class="kn">from</span> <span class="nn">grass.pygrass.modules</span> <span class="kn">import</span> <span class="n">Module</span><span class="p">,</span> <span class="n">ParallelModuleQueue</span>
+
+<span class="hll"><span class="k">def</span> <span class="nf">import_files</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+</span>    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+    <span class="c1"># queue for parallel jobs</span>
+<span class="hll">    <span class="n">queue</span> <span class="o">=</span> <span class="n">ParallelModuleQueue</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">options</span><span class="p">[</span><span class="s1">&#39;nprocs&#39;</span><span class="p">]))</span>
+</span>
+    <span class="n">import_module</span> <span class="o">=</span> <span class="n">Module</span><span class="p">(</span><span class="s1">&#39;v.in.lidar&#39;</span><span class="p">,</span>
+                           <span class="n">flags</span><span class="o">=</span><span class="s1">&#39;otb&#39;</span><span class="p">,</span>
+                           <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="hll">                           <span class="n">run_</span><span class="o">=</span><span class="kc">False</span>
+</span>    <span class="p">)</span>
+
+    <span class="n">maps</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">f</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;.laz&#39;</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">fullname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+        <span class="n">basename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="c1"># &#39;-&#39; is not valid for vector map names</span>
+        <span class="c1"># vector map names cannot start with number</span>
+        <span class="n">mapname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">basename</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span>
+        
+        <span class="n">maps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mapname</span><span class="p">)</span>
+        <span class="n">gs</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="s2">&quot;Importing &lt;</span><span class="si">{}</span><span class="s2">&gt;...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fullname</span><span class="p">))</span>
+<span class="hll">        <span class="n">import_task</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">import_module</span><span class="p">)</span>
+</span><span class="hll">        <span class="n">queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">import_task</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="n">fullname</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="n">mapname</span><span class="p">))</span>
+</span>    
+<span class="hll">    <span class="n">queue</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">maps</span><span class="p">:</span>
+        <span class="n">gs</span><span class="o">.</span><span class="n">fatal</span><span class="p">(</span><span class="s2">&quot;No input files found&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">maps</span>
+
+<span class="hll"><span class="k">def</span> <span class="nf">create_dtm_tiles</span><span class="p">(</span><span class="n">maps</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">nprocs</span><span class="p">,</span> <span class="n">offset_multiplier</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+</span>    <span class="n">offset</span><span class="o">=</span><span class="n">res</span> <span class="o">*</span> <span class="n">offset_multiplier</span>
+
+    <span class="k">for</span> <span class="n">mapname</span> <span class="ow">in</span> <span class="n">maps</span><span class="p">:</span>
+        <span class="n">Module</span><span class="p">(</span><span class="s1">&#39;g.region&#39;</span><span class="p">,</span>
+               <span class="n">vector</span><span class="o">=</span><span class="n">mapname</span><span class="p">,</span>
+<span class="hll">               <span class="n">n</span><span class="o">=</span><span class="s1">&#39;n+</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">offset</span><span class="p">),</span>
+</span><span class="hll">               <span class="n">s</span><span class="o">=</span><span class="s1">&#39;s-</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">offset</span><span class="p">),</span>
+</span><span class="hll">               <span class="n">e</span><span class="o">=</span><span class="s1">&#39;e+</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">offset</span><span class="p">),</span>
+</span><span class="hll">               <span class="n">w</span><span class="o">=</span><span class="s1">&#39;w-</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span>
+</span>        <span class="p">)</span>
+        
+        <span class="n">Module</span><span class="p">(</span><span class="s1">&#39;v.surf.rst&#39;</span><span class="p">,</span>
+               <span class="nb">input</span><span class="o">=</span><span class="n">mapname</span><span class="p">,</span>
+               <span class="n">elevation</span><span class="o">=</span><span class="n">mapname</span><span class="p">,</span>
+<span class="hll">               <span class="n">nprocs</span><span class="o">=</span><span class="n">nprocs</span><span class="p">,</span>
+</span>               <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+
+<span class="hll"><span class="k">def</span> <span class="nf">patch_tiles</span><span class="p">(</span><span class="n">maps</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">resolution</span><span class="p">):</span>
+</span>    <span class="n">gs</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="s2">&quot;Patching tiles &lt;</span><span class="si">{}</span><span class="s2">&gt;...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">maps</span><span class="p">)))</span>
+    <span class="n">Module</span><span class="p">(</span><span class="s1">&#39;g.region&#39;</span><span class="p">,</span> <span class="n">raster</span><span class="o">=</span><span class="n">maps</span><span class="p">,</span> <span class="n">res</span><span class="o">=</span><span class="n">resolution</span><span class="p">)</span>
+    <span class="n">Module</span><span class="p">(</span><span class="s1">&#39;r.series&#39;</span><span class="p">,</span> <span class="nb">input</span><span class="o">=</span><span class="n">maps</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="n">output</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;average&#39;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">Module</span><span class="p">(</span><span class="s1">&#39;r.colors&#39;</span><span class="p">,</span> <span class="nb">map</span><span class="o">=</span><span class="n">output</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;elevation&#39;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+    <span class="n">maps</span> <span class="o">=</span> <span class="n">import_files</span><span class="p">(</span><span class="n">options</span><span class="p">[</span><span class="s1">&#39;input&#39;</span><span class="p">])</span>
+    <span class="n">create_dtm_tiles</span><span class="p">(</span><span class="n">maps</span><span class="p">,</span>
+                     <span class="nb">float</span><span class="p">(</span><span class="n">options</span><span class="p">[</span><span class="s1">&#39;resolution&#39;</span><span class="p">]),</span>
+                     <span class="nb">int</span><span class="p">(</span><span class="n">options</span><span class="p">[</span><span class="s1">&#39;nprocs&#39;</span><span class="p">])</span>
+    <span class="p">)</span>
+    <span class="n">patch_tiles</span><span class="p">(</span><span class="n">maps</span><span class="p">,</span>
+                <span class="n">options</span><span class="p">[</span><span class="s1">&#39;elevation&#39;</span><span class="p">],</span>
+                <span class="n">options</span><span class="p">[</span><span class="s1">&#39;resolution&#39;</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="n">gs</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="s2">&quot;Done in </span><span class="si">{:.0f}</span><span class="s2"> min&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">((</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">/</span> <span class="mf">60.</span><span class="p">))</span>
+    
+    <span class="k">return</span> <span class="mi">0</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">options</span><span class="p">,</span> <span class="n">flags</span> <span class="o">=</span> <span class="n">gs</span><span class="o">.</span><span class="n">parser</span><span class="p">()</span>
+
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+</pre></div>
+</td></tr></table></div>
+<p>Sample script to download: <a class="reference external" href="../_static/scripts/create-dtm.py">create-dtm.py</a></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The script is taking a long time with all the tiles from
+<code class="file docutils literal notranslate"><span class="pre">/home/user/geodata/lidar</span></code> directory. Choose few tiles
+for testing.</p>
+<p>Create a new directory eg. <code class="file docutils literal notranslate"><span class="pre">/tmp/lidar</span></code> and link some (2
+or 3) of the LAZ files with</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ln -s /home/user/geodata/lidar/las_681_5644_1_th_2014-2019.laz /tmp/lidar/
+</pre></div>
+</div>
+<p>Use <code class="file docutils literal notranslate"><span class="pre">/tmp/lidar</span></code> as <code class="xref std std-option docutils literal notranslate"><span class="pre">input</span></code> in the <code class="file docutils literal notranslate"><span class="pre">create-dtm.py</span></code> script</p>
+</div>
+<div class="figure align-center" id="id1">
+<img alt="../_images/dtm_patched.png" class="middle" src="../_images/dtm_patched.png" />
+<p class="caption"><span class="caption-text">DTM created from all available tiles.</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</div>
+</div>
+<div class="section" id="dtm-comparision">
+<span id="dmt-comparision"></span><h2>DTM comparision<a class="headerlink" href="#dtm-comparision" title="Permalink to this headline">¶</a></h2>
+<p>In this session we are going to calculate the Canopy Height Model
+(CHM), as the difference between interpolated DSM and imported EU-DEM
+DTM from <a class="reference internal" href="15.html"><span class="doc">Unit 15 - DTM reprojection</span></a>.</p>
+<p>The CHM is computed using <a class="reference external" href="http://grass.osgeo.org/grass78/manuals/r.mapcalc.html">r.mapcalc</a>, executing the difference between
+DSM and DTM</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>r.mapcalc <span class="nv">expression</span><span class="o">=</span><span class="s2">&quot;chm = dtm_laz - dem&quot;</span>
+</pre></div>
+</div>
+<div class="figure align-center" id="id2">
+<img alt="../_images/chm.png" class="middle" src="../_images/chm.png" />
+<p class="caption"><span class="caption-text">The CHM map.</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+</div>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          
+          <h3>Table of Contents</h3>
+          <ul>
+<li class="toctree-l1"><a class="reference internal" href="01.html">[Part 1] About GRASS GIS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02.html">[Part 1] First steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03.html">[Part 1] Data Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04.html">[Part 1] Modules, Region</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05.html">[Part 1] Raster processing</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="20.html">[Part 2] Accessing Sentinel EO data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="21.html">[Part 2] Time series data processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="22.html">[Part 2] Temporal Framework Python API</a></li>
+</ul>
+
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="../search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+            </form>
+          </div>
+
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+          </div>
+          <div role="note" aria-label="source link">
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021 Martin Landa.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.3.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>

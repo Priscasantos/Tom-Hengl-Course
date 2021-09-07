@@ -1,0 +1,225 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Unit 10 - Python intro &#8212; ODSE GRASS GIS Workshop in Wageningen 2021</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/gismentors.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="../index.html">ODSE GRASS GIS Workshop in Wageningen 2021</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="unit-10-python-intro">
+<h1>Unit 10 - Python intro<a class="headerlink" href="#unit-10-python-intro" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="http://en.wikipedia.org/wiki/Python">Python</a> programming/scripting language is very popular in
+the field of GIS and a science in general. Python is also the main
+scripting platform for Esri products (see <a class="reference external" href="http://pro.arcgis.com/en/pro-app/arcpy/get-started/what-is-arcpy-.htm">arcpy</a>
+package). GRASS is not an exception. In reality, many GRASS modules
+are simple Python scripts, eg. <a class="reference external" href="http://grass.osgeo.org/grass78/manuals/r.mask.html">r.mask</a> (see <em>Source Code</em>
+section).</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Until GRASS GIS version 7.6 only Python 2 has been
+supported. Python 3 support has been introduced in GRASS GIS
+recently. The first version with full Python 3 support is GRASS GIS
+7.8 (Sep 2019).</p>
+</div>
+<p>GRASS Python environment includes various libraries, see
+<a class="reference external" href="http://grass.osgeo.org/grass78/manuals/libpython/index.html">GRASS documentation</a> for
+details. Let’s focus on three main libraries related to this workshop:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="http://grass.osgeo.org/grass78/manuals/libpython/script_intro.html">GRASS Scripting Library</a>
+as entering node to Python scripting capabilities in GRASS GIS</p></li>
+<li><p>object-oriented (real Python) <a class="reference external" href="http://grass.osgeo.org/grass78/manuals/libpython/pygrass_index.html">pyGRASS</a></p></li>
+<li><p>spatio-temporal <a class="reference external" href="http://grass.osgeo.org/grass78/manuals/libpython/temporal_framework.html">GRASS GIS Temporal Framework</a></p></li>
+</ul>
+<p><a class="reference external" href="http://grass.osgeo.org/grass78/manuals/libpython/pygrass_index.html">PyGRASS</a> has been
+originally design as an <strong>object-oriented</strong> Python API for GRASS
+GIS. This is a major difference to <a class="reference external" href="http://grass.osgeo.org/grass78/manuals/libpython/script_intro.html">GRASS Scripting Library</a> which consists of procedures - Python
+functions. It is important to highlight that PyGRASS has not been
+designed as replacement of GRASS Scripting Library, the both libraries
+are living next to each other. It is up to the user (you) which
+library use in his/her scripts. It’s also possible to compine the both
+libraries in one script.</p>
+<p>Let’s do our first steps towards Python scripting in GRASS GIS using
+Layer Manager’s <span class="item">Python</span> tab.</p>
+<div class="figure align-center" id="id1">
+<img alt="../_images/layer-manager-python.png" src="../_images/layer-manager-python.png" />
+<p class="caption"><span class="caption-text">Python shell in Layer Manager.</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</div>
+<p>As initial step we try to script a simple computation workflow below:</p>
+<ol class="arabic simple">
+<li><p>Set computation extent to Jena city region, align region to Sentinel bands</p></li>
+<li><p>Extend computation region by 1km offset</p></li>
+<li><p>Set mask based on cloud vector map</p></li>
+<li><p>Compute NDVI</p></li>
+<li><p>Compute NDVI values statistics, print min, max and mean NDVI values</p></li>
+</ol>
+<p>The workflow turns into bunch of GRASS commands (map names shorten):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># 1.</span>
+g.region <span class="nv">vector</span><span class="o">=</span>jena_boundary <span class="nv">align</span><span class="o">=</span>B04_10m
+<span class="c1"># 2.</span>
+g.region <span class="nv">n</span><span class="o">=</span>n+1000 <span class="nv">s</span><span class="o">=</span>s-1000 <span class="nv">e</span><span class="o">=</span>e+1000 <span class="nv">w</span><span class="o">=</span>w-1000
+<span class="c1"># 3.</span>
+r.mask -i <span class="nv">vector</span><span class="o">=</span>MaskFeature
+<span class="c1"># 4.</span>
+i.vi <span class="nv">red</span><span class="o">=</span>B04_10m <span class="nv">output</span><span class="o">=</span>ndvi <span class="nv">viname</span><span class="o">=</span>ndvi <span class="nv">nir</span><span class="o">=</span>B08_10m
+<span class="c1"># 5.</span>
+r.univar <span class="nv">map</span><span class="o">=</span>ndvi
+</pre></div>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>GRASS modules run from <span class="item">Console</span> and GUI dialogs can be
+logged into file by <span class="item">Log file</span> (click to start/stop
+logging). Logged commands can be used as a starting point for your
+first Python script.</p>
+<div class="figure align-center" id="id2">
+<img alt="../_images/layer-manager-log-file.svg" src="../_images/layer-manager-log-file.svg" /><p class="caption"><span class="caption-text">Log GRASS commands into file.</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+</div>
+</div>
+<p>These commands will be turned into Python syntax. In this unit <strong>GRASS
+Scripting Library</strong> will be used since GUI Python tab already includes
+this library. Only basic syntax will be explained. In next units we
+will switch to more “Pythonic” <strong>PyGRASS</strong> library.</p>
+<p id="python-code">GRASS commands can be run by <a class="reference external" href="http://grass.osgeo.org/grass78/manuals/libpython/script.html#script.core.run_command">core.run_command</a> function.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 1.</span>
+<span class="n">grass</span><span class="o">.</span><span class="n">run_command</span><span class="p">(</span><span class="s1">&#39;g.region&#39;</span><span class="p">,</span> <span class="n">vector</span><span class="o">=</span><span class="s1">&#39;jena_boundary&#39;</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="s1">&#39;L2A_T32UPB_20170706T102021_B04_10m&#39;</span><span class="p">)</span>
+<span class="c1"># 2.</span>
+<span class="n">grass</span><span class="o">.</span><span class="n">run_command</span><span class="p">(</span><span class="s1">&#39;g.region&#39;</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="s1">&#39;n+1000&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="s1">&#39;s-1000&#39;</span><span class="p">,</span> <span class="n">e</span><span class="o">=</span><span class="s1">&#39;e+1000&#39;</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="s1">&#39;w-1000&#39;</span><span class="p">)</span>
+<span class="c1"># 3.</span>
+<span class="n">grass</span><span class="o">.</span><span class="n">run_command</span><span class="p">(</span><span class="s1">&#39;r.mask&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">vector</span><span class="o">=</span><span class="s1">&#39;MaskFeature&#39;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># 4.</span>
+<span class="n">grass</span><span class="o">.</span><span class="n">run_command</span><span class="p">(</span><span class="s1">&#39;i.vi&#39;</span><span class="p">,</span> <span class="n">red</span><span class="o">=</span><span class="s1">&#39;L2A_T32UPB_20170706T102021_B04_10m&#39;</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="s1">&#39;ndvi&#39;</span><span class="p">,</span>
+                  <span class="n">viname</span><span class="o">=</span><span class="s1">&#39;ndvi&#39;</span><span class="p">,</span> <span class="n">nir</span><span class="o">=</span><span class="s1">&#39;L2A_T32UPB_20170706T102021_B08_10m&#39;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># 5.</span>
+<span class="n">grass</span><span class="o">.</span><span class="n">run_command</span><span class="p">(</span><span class="s1">&#39;r.univar&#39;</span><span class="p">,</span> <span class="nb">map</span><span class="o">=</span><span class="s1">&#39;ndvi&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Python shell has its history, previous commands can be browsed by
+<kbd class="kbd docutils literal notranslate"><kbd class="kbd docutils literal notranslate">Alt</kbd>+<kbd class="kbd docutils literal notranslate">P</kbd></kbd>, next commands by <kbd class="kbd docutils literal notranslate"><kbd class="kbd docutils literal notranslate">Alt</kbd>+<kbd class="kbd docutils literal notranslate">N</kbd></kbd>.</p>
+</div>
+<p>Output of module <a class="reference external" href="http://grass.osgeo.org/grass78/manuals/r.univar.html">r.univar</a> is discarded by
+<a class="reference external" href="http://grass.osgeo.org/grass78/manuals/libpython/script.html#script.core.run_command">core.run_command</a> function. <a class="reference external" href="http://grass.osgeo.org/grass78/manuals/r.univar.html">r.univar</a> must
+be run by <a class="reference external" href="http://grass.osgeo.org/grass78/manuals/libpython/script.html#script.core.read_command">core.read_command</a> which returns an output of
+the command. But it is still not perfect, statistics is printed to
+standard output. It would be feasible to process command output as
+Python object, a directory. This requires to:</p>
+<ul class="simple">
+<li><p>run <a class="reference external" href="http://grass.osgeo.org/grass78/manuals/r.univar.html">r.univar</a> with <span class="param">-g</span> to enable shell script
+(parse-able) output</p></li>
+<li><p>use <a class="reference external" href="http://grass.osgeo.org/grass78/manuals/libpython/script.html#script.core.parse_command">core.parse_command</a> function which parses output
+and store result as a directory object</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 5.</span>
+<span class="n">stats</span> <span class="o">=</span> <span class="n">grass</span><span class="o">.</span><span class="n">parse_command</span><span class="p">(</span><span class="s1">&#39;r.univar&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="nb">map</span><span class="o">=</span><span class="s1">&#39;ndvi&#39;</span><span class="p">)</span>
+<span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;NDVI min value: </span><span class="si">{0:.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">stats</span><span class="p">[</span><span class="s1">&#39;min&#39;</span><span class="p">])))</span>
+<span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;NDVI max value: </span><span class="si">{0:.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">stats</span><span class="p">[</span><span class="s1">&#39;max&#39;</span><span class="p">])))</span>
+<span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;NDVI mean value: </span><span class="si">{0:.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">stats</span><span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">])))</span>
+</pre></div>
+</div>
+<div class="figure align-center" id="id3">
+<img alt="../_images/python-result.svg" src="../_images/python-result.svg" /><p class="caption"><span class="caption-text">Running Python code in Layer Manager.</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
+</div>
+<p>Resultant NDVI raster map can be displayed easily by calling
+<code class="docutils literal notranslate"><span class="pre">AddLayer()</span></code> function directly from Python shell.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">AddLayer</span><span class="p">(</span><span class="s1">&#39;ndvi&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="graphical-modeler-and-python">
+<span id="modeler-python"></span><h2>Graphical Modeler and Python<a class="headerlink" href="#graphical-modeler-and-python" title="Permalink to this headline">¶</a></h2>
+<p>A model created in Graphical Modeler can be easily turned into Python
+script. Let’s open the one of models created in <a class="reference internal" href="09.html"><span class="doc">Unit 09 - Model tuning</span></a>:
+<a class="reference external" href="../_static/models/ndvi-v2.gxm">ndvi-v2.gxm</a> and switch to
+<span class="item">Python editor</span> tab.</p>
+<p>Generated Python script can be easily modified in built-in simple
+editor.</p>
+<div class="figure align-center" id="id4">
+<img alt="../_images/model-python-editor.svg" class="middle" src="../_images/model-python-editor.svg" /><p class="caption"><span class="caption-text">Python editor integrated in Graphical Modeler. Python code can be run or
+saved into file.</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
+</div>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          
+          <h3>Table of Contents</h3>
+          <ul>
+<li class="toctree-l1"><a class="reference internal" href="01.html">[Part 1] About GRASS GIS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02.html">[Part 1] First steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03.html">[Part 1] Data Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04.html">[Part 1] Modules, Region</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05.html">[Part 1] Raster processing</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="20.html">[Part 2] Accessing Sentinel EO data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="21.html">[Part 2] Time series data processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="22.html">[Part 2] Temporal Framework Python API</a></li>
+</ul>
+
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="../search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+            </form>
+          </div>
+
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+          </div>
+          <div role="note" aria-label="source link">
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021 Martin Landa.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.3.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>
