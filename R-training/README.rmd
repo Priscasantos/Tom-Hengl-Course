@@ -32,6 +32,11 @@ ls <- c("rgdal", "raster", "plotKML", "ranger", "mlr", "geoR", "parallelMap",
 new.packages <- ls[!(ls %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 options(warn=-1)
+if(!Sys.info()['sysname']=="Windows"){ 
+  mc.cores <- parallel::detectCores() 
+} else { 
+  mc.cores <- 1
+}
 #load("eml_data.RData")
 ```
 
@@ -692,7 +697,7 @@ ov.pnts <- parallel::mclapply(1:length(LST.listday), function(i){
                 date.tif.begin=begin.tif1.lst[i], 
                 date.tif.end=end.tif1.lst[i], 
                 coords=c("x","y"), variable.name="LST.day") }, 
-     mc.cores=parallel::detectCores())
+     mc.cores=mc.cores)
 ov.pnts = ov.pnts[!sapply(ov.pnts, is.null)]
 ov.tifs1 = plyr::join_all(ov.pnts, by="row.id", type="full")
 str(ov.tifs1)
@@ -713,7 +718,7 @@ ov.pnts <- parallel::mclapply(1:length(LST.listnight), function(i){
                 date.tif.begin=begin.tif2.lst[i], 
                 date.tif.end=end.tif2.lst[i], 
                 coords=c("x","y"), variable.name="LST.night") }, 
-     mc.cores=parallel::detectCores())
+     mc.cores=mc.cores)
 ov.pnts = ov.pnts[!sapply(ov.pnts, is.null)]
 ov.tifs2 = plyr::join_all(ov.pnts, by="row.id", type="full")
 str(ov.tifs2)
@@ -806,10 +811,10 @@ sel.tifs2 = LST.listnight[grep("_08_", LST.listnight)]
 ## read to R in parallel
 x1 = as.data.frame( parallel::mclapply(sel.tifs1, 
             function(i){x <- readGDAL(i)$band1; x <- ifelse(x<1, NA, x); return(x)}, 
-             mc.cores = parallel::detectCores()))
+             mc.cores = mc.cores))
 x2 = as.data.frame( parallel::mclapply(sel.tifs2, 
             function(i){x <- readGDAL(i)$band1; x <- ifelse(x<1, NA, x); return(x)}, 
-             mc.cores = parallel::detectCores()))
+             mc.cores = mc.cores))
 names(x1)  <- basename(sel.tifs1); names(x2) <- basename(sel.tifs2)
 ```
 
@@ -830,11 +835,11 @@ t2s = parallel::parApply(cl, x2, 1,
       function(y) { try( approx(in.days, as.vector(y), xout=as.numeric(strftime(dates.lst, format = "%j")))$y ) })
 stopCluster(cl)
 ## remove missing pixels
-x.t1s = mclapply(t1s, length, mc.cores = parallel::detectCores())
+x.t1s = parallel::mclapply(t1s, length, mc.cores = mc.cores)
 t1s[which(!x.t1s==8)] <- list(rep(NA, 8))
 t1s = do.call(rbind.data.frame, t1s)
 names(t1s) = paste0("LST.day_", dates.lst)
-x.t2s = mclapply(t2s, length, mc.cores = parallel::detectCores())
+x.t2s = parallel::mclapply(t2s, length, mc.cores = mc.cores)
 t2s[which(!x.t2s==8)] <- list(rep(NA, 8))
 t2s = do.call(rbind.data.frame, t2s)
 names(t2s) = paste0("LST.night_", dates.lst)
@@ -1009,8 +1014,8 @@ visualize changes using e.g. the `animation` package.
 In the next example we demonstrate how to fit a spatiotemporal model
 using biological data: occurrences of [*Fagus
 sylvatica*](https://www.gbif.org/species/2882316) over Europe. This is
-the domain of **Specied Distribution modeling**, except in this case we
-model distribution of target species in spacetime. The point data has
+the domain of **Species Distribution modeling**, except in this case we
+model distribution of target species also in spacetime. The point data has
 been compiled for the purpose of the OpenDataScience.eu project, then
 cleaned and overlaid vs time-series of Landsat GLAD images and climatic
 variables. For more details refer to the [eumap
@@ -1156,6 +1161,31 @@ the species, which is expected because forest species distribution
 change on a scale of 50 to 100 year, however some changes in
 distribution of the species can be detected nevertheless.
 
+We can also plot the images using the `plotKML` package so we can open and 
+visualize predictions in Google Earth or similar:
+
+```{r, eval=FALSE}
+library(plotKML)
+for(j in c(2015,2017,2019)){
+  kml(m1, colour=m1@data[,paste0("Prob.", j)], file.name=paste0("prob.", j, ".kml"),
+      raster_name = paste0("prob.", j, ".png"),
+      colour_scale = SAGA_pal[["SG_COLORS_YELLOW_BLUE"]], 
+      z.lim=c(0,100),
+      TimeSpan.begin = as.Date(paste0(j, "-01-01")), TimeSpan.end = as.Date(paste0(j, "-12-31")))
+}
+```
+
+In this case we attach to each prediction also the `TimeSpan.begin` and `TimeSpan.end` 
+which means that Google Earth will recognize the temporal reference of the predictions. 
+Opening predictions in Google Earth allows us to do some interpretation of produced maps and also 
+analyze how much are the changes in vegetation cover connected with relief, 
+proximity to urban areas, possible fire / flood events and similar.
+
+<img src="img/Fig_google_earth_prob_ts.jpg" width="650"/>
+
+*Figure: Spacetime predictions of distribution of Fagus Sylvatica visualized as time-series data in Google Earth.*
+
+
 ## Summary notes
 
 In this tutorial we have reviewed some aspects of spatial and
@@ -1169,14 +1199,15 @@ For spatiotemporal models, we recommend combining and using covariates that
 can represent long-term or accumulated effects of climate, together with 
 covariates that can represent daily to monthly oscillation of variables such as soil
 moisture, temperatures and similar. During the design of the modeling system, 
-we highly recommend first trying to understand ecology and processes behind 
-variable of interest. The example in @gasch2015spatio shows how in-depth 
+we highly recommend first **trying to understand ecology and processes behind 
+variable of interest** the designing the modeling system to best reflect expert 
+knowledge. The example in @gasch2015spatio shows how in-depth 
 understanding of the problem can help design modeling framework and prevent 
 from over-fitting problems and similar.
 
-Where time-series EO data exists, this can be also incorporated into the 
-mapping algorithm. For spacetime overlays we recommend using Cloud-Optimized 
-GeoTIFFs and the `terra` package [@hijmans2019spatial] which helps speed-up overlays.
+Where time-series EO data exists, these can be also incorporated into the 
+mapping algorithm as shown with three case studies. For spacetime overlays we 
+recommend using Cloud-Optimized GeoTIFFs and the `terra` package [@hijmans2019spatial] which helps speed-up overlays.
 
 Spatiotemporal datasets can be at the order of magnitude larger, hence
 it is important, when implementing analysis of spatiotemporal data, to
@@ -1187,7 +1218,7 @@ consider computing optimization, which typically implies:
     subset) from predictions,
 -   Using tiling systems to run overlay, predictions and visualizations,
 
-The generic steps to fit spatiotemporal models described in this
+Finally, the generic steps to fit spatiotemporal models described in this
 tutorial include:
 
 1.  Prepare training (points) data and data cube with all covariates
