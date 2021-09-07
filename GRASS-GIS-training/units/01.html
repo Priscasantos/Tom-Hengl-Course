@@ -1,0 +1,214 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>[Part 1] About GRASS GIS &#8212; ODSE GRASS GIS Workshop in Wageningen 2021</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/gismentors.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="[Part 1] First steps" href="02.html" />
+    <link rel="prev" title="Introduction" href="../index.html" /> 
+  </head><body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="../index.html">ODSE GRASS GIS Workshop in Wageningen 2021</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="../index.html" title="Introduction"
+             accesskey="P">previous</a> |
+          <a href="02.html" title="[Part 1] First steps"
+             accesskey="N">next</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="part-1-about-grass-gis">
+<h1>[Part 1] About GRASS GIS<a class="headerlink" href="#part-1-about-grass-gis" title="Permalink to this headline">¶</a></h1>
+<p><strong>GRASS GIS</strong>, commonly referred to as GRASS (Geographic Resources
+Analysis Support System), is a free and open-source Geographic
+Information System (GIS) software suite used for geospatial data
+management and analysis, image processing, graphics and maps
+production, spatial modelling, and visualization. GRASS GIS is
+currently used in academic and commercial settings around the world,
+as well as by many governmental agencies and environmental consulting
+companies. It is a founding member of the Open Source Geospatial
+Foundation (<a class="reference external" href="http://www.osgeo.org">OSGeo</a>).</p>
+<p>Originally developed by the U.S. Army Construction Engineering
+Research Laboratories (USA-CERL, 1982-1995, see history of GRASS
+1.0-4.2 and 5beta), a branch of the US Army Corp of Engineers, as a
+tool for land management and environmental planning by the military,
+GRASS GIS has evolved into a powerful utility with a wide range of
+applications in many different areas of applications and scientific
+research (source: <a class="reference external" href="https://grass.osgeo.org">https://grass.osgeo.org</a>).</p>
+<div style="text-align: center"><iframe src="http://www.youtube.com/embed/U3Hf0qI4JLc"     width="700" height="360" frameborder="0"     webkitAllowFullScreen mozallowfullscreen allowfullscreen     class="align-center"></iframe><div style="margin-top: 5px; margin-bottom: 5px"><i>GRASS GIS promo video from 1987</i></div></div><div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Get higher quality video at <a class="reference external" href="https://av.tib.eu/media/12963">TIB AV-Portal</a>.</p>
+</div>
+<div class="section" id="in-a-nutshell">
+<h2>In a nutshell<a class="headerlink" href="#in-a-nutshell" title="Permalink to this headline">¶</a></h2>
+<p><strong>Advantages</strong>:</p>
+<ul class="simple">
+<li><p>open-source, you can use it freely, modify, improve, share</p></li>
+<li><p>a strong user community, commercial support</p></li>
+<li><p>large scale functionality, a large amount of tools (2D/3D
+raster/vector, topology, imagery, map production, spatio-temporal
+data, …)</p></li>
+<li><p>both GUI and CMD (easy for scripting) user interface</p></li>
+<li><p>Python API and libraries</p></li>
+</ul>
+<p><strong>Disadvantages</strong> (turning out to be advantages in some cases):</p>
+<ul class="simple">
+<li><p>open-source ;-)</p></li>
+<li><p>complicated for newcomers (we solved it in GRASS 8 ;-))</p></li>
+<li><p>native data format (requires importing data, be aware of the possibility
+of linking external formats)</p></li>
+<li><p>vector topology (confusing for GIS beginners, sometimes tricky to
+import broken GIS data)</p></li>
+</ul>
+<p><strong>When to use GRASS GIS?</strong></p>
+<ul class="simple">
+<li><p>doing data analysis</p></li>
+<li><p>working with topological vector data</p></li>
+<li><p>working with a large amount of data</p></li>
+<li><p>analysing spatio-temporal data</p></li>
+<li><p>doing Python scripting</p></li>
+<li><p>deploying server-side applications (see <a class="reference external" href="https://www.osgeo.org/projects/actinia/">actinia</a> project for example)</p></li>
+<li><p><em>add your point here…</em></p></li>
+</ul>
+<p><strong>When to use rather something else?</strong></p>
+<ul class="simple">
+<li><p>want to visualize geodata in an easy and quick way (use QGIS instead)</p></li>
+<li><p>want to access simple features</p></li>
+<li><p>being scared of location and mapsets ;-)</p></li>
+<li><p><em>add your point here…</em></p></li>
+</ul>
+</div>
+<div class="section" id="how-to-install">
+<h2>How to install<a class="headerlink" href="#how-to-install" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="gnu-linux">
+<h3>GNU/Linux<a class="headerlink" href="#gnu-linux" title="Permalink to this headline">¶</a></h3>
+<p>See <a class="reference external" href="https://grass.osgeo.org/download/software/linux/">https://grass.osgeo.org/download/software/linux/</a></p>
+<p>Example for Debian/Ubuntu OS:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt install grass
+</pre></div>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>More recent versions of GRASS are available via <a class="reference external" href="https://launchpad.net/~ubuntugis/+archive/ubuntu/ubuntugis-unstable">UbuntuGIS PPA</a>.</p>
+</div>
+</div>
+<div class="section" id="ms-windows">
+<h3>MS Windows<a class="headerlink" href="#ms-windows" title="Permalink to this headline">¶</a></h3>
+<p>See <a class="reference external" href="https://grass.osgeo.org/download/software/ms-windows/">https://grass.osgeo.org/download/software/ms-windows/</a></p>
+<p>There are basically two options:</p>
+<ol class="arabic simple">
+<li><p>OSGeo4W network installer</p></li>
+<li><p>traditional standalone installer</p></li>
+</ol>
+<p>Choose 64bit version if you don’t care.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>GRASS GIS is also part of the <a class="reference external" href="https://qgis.org/en/site/forusers/download.html">QGIS installer on Windows</a>. So if QGIS is
+already installed on your machine, you don’t have to install GRASS
+GIS separately.</p>
+</div>
+</div>
+</div>
+<div class="section" id="useful-links">
+<h2>Useful links<a class="headerlink" href="#useful-links" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://grass.osgeo.org">GRASS GIS homepage</a></p></li>
+<li><p><a class="reference external" href="https://grasswiki.osgeo.org">GRASS GIS wiki</a>: a lot of information, with examples
+and tutorials</p></li>
+<li><p><a class="reference external" href="http://lists.osgeo.org/mailman/listinfo/grass-user">GRASS user mailing list</a>:
+the simpler and most used way to ask for support</p></li>
+<li><p><a class="reference external" href="https://gis.stackexchange.com/questions/tagged/grass">GRASS on stackexchange</a>:
+another way to ask for support</p></li>
+<li><p><a class="reference external" href="https://grass.osgeo.org/documentation/tutorials/">GRASS GIS tutorials</a>:
+an incomplete list of tutorials related to GRASS GIS</p></li>
+</ul>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          
+          <h3>Table of Contents</h3>
+          <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">[Part 1] About GRASS GIS</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#in-a-nutshell">In a nutshell</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#how-to-install">How to install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#useful-links">Useful links</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="02.html">[Part 1] First steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03.html">[Part 1] Data Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04.html">[Part 1] Modules, Region</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05.html">[Part 1] Raster processing</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="06.html">[Part 2] Accessing Sentinel EO data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="07.html">[Part 2] Time series data processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="08.html">[Part 2] Temporal Framework Python API</a></li>
+</ul>
+
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="../search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+            </form>
+          </div>
+
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="../index.html" title="Introduction"
+              >previous</a> |
+            <a href="02.html" title="[Part 1] First steps"
+              >next</a>
+          </div>
+          <div role="note" aria-label="source link">
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021 CTU GeoForAll Lab.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.3.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>

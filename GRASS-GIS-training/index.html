@@ -1,0 +1,205 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Introduction &#8212; ODSE GRASS GIS Workshop in Wageningen 2021</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/gismentors.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="[Part 1] About GRASS GIS" href="units/01.html" /> 
+  </head><body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="#">ODSE GRASS GIS Workshop in Wageningen 2021</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="units/01.html" title="[Part 1] About GRASS GIS"
+             accesskey="N">next</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="software-used-in-this-training-materials">
+<h2>Software used in this training materials<a class="headerlink" href="#software-used-in-this-training-materials" title="Permalink to this headline">¶</a></h2>
+<div class="figure align-center">
+<img alt="_images/grass-gis-logo.png" class="small" src="_images/grass-gis-logo.png" />
+</div>
+<ul class="simple">
+<li><p><a class="reference external" href="http://grass.osgeo.org">GRASS GIS</a> <strong>version 8</strong> for geospatial
+raster, imagery, and vector data processing and providing spatial
+analysis.</p></li>
+<li><p><a class="reference external" href="http://gdal.org">GDAL library</a> for reading and writing various
+geospatial data.</p></li>
+<li><p><a class="reference external" href="https://pypi.python.org/pypi/sentinelsat">sentinelsat library</a>
+utility to search and download Copernicus Sentinel satellite images.</p></li>
+</ul>
+</div>
+<div class="section" id="sample-data">
+<h2>Sample data<a class="headerlink" href="#sample-data" title="Permalink to this headline">¶</a></h2>
+<p>For purpose of this training materials a <a class="reference external" href="https://geo.fsv.cvut.cz/geoharmonizer/odse_workshop_2021/grass-gis-data.zip">sample data including GRASS
+8 binaries</a> (690MB)
+has been created based on Open Data covering ODSE pilot tiles.</p>
+</div>
+<div class="section" id="content">
+<h2>Content<a class="headerlink" href="#content" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="grass-gis-8-part-1-introduction-and-new-features">
+<h3>GRASS GIS 8 (Part 1): Introduction and new features<a class="headerlink" href="#grass-gis-8-part-1-introduction-and-new-features" title="Permalink to this headline">¶</a></h3>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="units/01.html">[Part 1] About GRASS GIS</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="units/01.html#in-a-nutshell">In a nutshell</a></li>
+<li class="toctree-l2"><a class="reference internal" href="units/01.html#how-to-install">How to install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="units/01.html#useful-links">Useful links</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="units/02.html">[Part 1] First steps</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="units/02.html#create-a-new-location">Create a new location</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="units/03.html">[Part 1] Data Management</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="units/03.html#vector-data">Vector data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="units/03.html#raster-data">Raster data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="units/03.html#notes">Notes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="units/04.html">[Part 1] Modules, Region</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="units/04.html#accessing-grass-modules">Accessing GRASS modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="units/04.html#computational-region">Computational region</a></li>
+<li class="toctree-l2"><a class="reference internal" href="units/04.html#color-table">Color table</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="units/05.html">[Part 1] Raster processing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="units/05.html#computing-dtm-derivates">Computing DTM derivates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="units/05.html#working-with-a-mask">Working with a mask</a></li>
+<li class="toctree-l2"><a class="reference internal" href="units/05.html#map-algebra">Map algebra</a></li>
+<li class="toctree-l2"><a class="reference internal" href="units/05.html#automatization">Automatization</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="grass-gis-8-part-2-processing-multitemporal-eo-data">
+<h3>GRASS GIS 8 (Part 2): Processing multitemporal EO data<a class="headerlink" href="#grass-gis-8-part-2-processing-multitemporal-eo-data" title="Permalink to this headline">¶</a></h3>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="units/06.html">[Part 2] Accessing Sentinel EO data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="units/06.html#download-data">Download data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="units/06.html#import-data">Import data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="units/06.html#computing-ndvi">Computing NDVI</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="units/07.html">[Part 2] Time series data processing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="units/07.html#create-space-time-dataset">Create space-time dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="units/07.html#ndvi-st-computation">NDVI ST computation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="units/08.html">[Part 2] Temporal Framework Python API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="units/08.html#workflow">Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="units/08.html#ui">UI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="units/08.html#python-temporal-api">Python Temporal API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="units/08.html#example-of-usage">Example of usage</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="lecturer">
+<h2>Lecturer<a class="headerlink" href="#lecturer" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="http://geo.fsv.cvut.cz/gwiki/Landa">Martin Landa</a>, GeoForAll
+Lab, Czech Technical University in Prague, Czech Republic</p></li>
+</ul>
+<p>Thanks to Veronica Andreo (Instituto de Altos Estudios Espaciales
+“Mario Gulich” - CONICET) and Ondřej Pešek (CTU in Prague) for the
+contribution!</p>
+</div>
+<div class="section" id="license">
+<h2>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/cc-by-sa.png"><img alt="_images/cc-by-sa.png" src="_images/cc-by-sa.png" style="width: 130px;" /></a>
+</div>
+<p>Source code available on <a class="reference external" href="https://github.com/ctu-geoforall-lab/grass-gis-workshop-wageningen-2021">GitHub</a>. Feel
+free to open issues or pull requests to improve the materials :-)</p>
+<p><em>Document version:</em> 1.0 (built Sep 07, 2021)</p>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          
+          <h3>Table of Contents</h3>
+          <ul>
+<li class="toctree-l1"><a class="reference internal" href="units/01.html">[Part 1] About GRASS GIS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="units/02.html">[Part 1] First steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="units/03.html">[Part 1] Data Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="units/04.html">[Part 1] Modules, Region</a></li>
+<li class="toctree-l1"><a class="reference internal" href="units/05.html">[Part 1] Raster processing</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="units/06.html">[Part 2] Accessing Sentinel EO data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="units/07.html">[Part 2] Time series data processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="units/08.html">[Part 2] Temporal Framework Python API</a></li>
+</ul>
+
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+            </form>
+          </div>
+
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="units/01.html" title="[Part 1] About GRASS GIS"
+              >next</a>
+          </div>
+          <div role="note" aria-label="source link">
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021 CTU GeoForAll Lab.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.3.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>

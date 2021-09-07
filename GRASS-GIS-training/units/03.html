@@ -1,0 +1,274 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>[Part 1] Data Management &#8212; ODSE GRASS GIS Workshop in Wageningen 2021</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/gismentors.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="[Part 1] Modules, Region" href="04.html" />
+    <link rel="prev" title="[Part 1] First steps" href="02.html" /> 
+  </head><body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="../index.html">ODSE GRASS GIS Workshop in Wageningen 2021</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="02.html" title="[Part 1] First steps"
+             accesskey="P">previous</a> |
+          <a href="04.html" title="[Part 1] Modules, Region"
+             accesskey="N">next</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="part-1-data-management">
+<h1>[Part 1] Data Management<a class="headerlink" href="#part-1-data-management" title="Permalink to this headline">¶</a></h1>
+<p>Data can be imported simply from the toolbar in the <span class="item">Data</span> tab by tools
+dedicated for <a class="reference external" href="http://en.wikipedia.org/wiki/GIS_file_formats#Raster">raster</a>
+<a class="reference internal" href="../_images/raster-import.png"><img alt="grass-raster-import" src="../_images/raster-import.png" style="width: 1.5em;" /></a> or <a class="reference external" href="http://en.wikipedia.org/wiki/GIS_file_formats#Vector">vector</a>
+<a class="reference internal" href="../_images/vector-import.png"><img alt="grass-vector-import" src="../_images/vector-import.png" style="width: 1.5em;" /></a> GIS data formats. Basic knowledge of commonly
+used <a class="reference external" href="http://en.wikipedia.org/wiki/GIS file formats">GIS file formats</a> is required.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>GRASS terminology differs from commonly used GIS
+packages. To avoid confusion let’s focus on the most
+important terms. The commonly used term “a layer” is called “a map”
+GRASS. While the GRASS layer is a subset of features within
+one “map”. So “GRASS raster map” can be treated as “a raster
+layer” in other GIS packages.</p>
+</div>
+<div class="section" id="vector-data">
+<h2>Vector data<a class="headerlink" href="#vector-data" title="Permalink to this headline">¶</a></h2>
+<p>Let’s import the sample ODSE tiles (<code class="file docutils literal notranslate"><span class="pre">odse_tiles.gpkg</span></code>) vector data
+from the toolbar <a class="reference internal" href="../_images/vector-import.png"><img alt="grass-vector-import" src="../_images/vector-import.png" style="width: 1.5em;" /></a> <sup>Import vector data
+[v.import]</sup>.</p>
+<div class="figure align-center" id="id1">
+<img alt="../_images/odse_tiles_import.png" src="../_images/odse_tiles_import.png" />
+<p class="caption"><span class="caption-number">Fig. 9 </span><span class="caption-text">Select input vector file to be imported.</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</div>
+<div class="figure align-center" id="id2">
+<img alt="../_images/odse_tiles.png" class="large" src="../_images/odse_tiles.png" />
+<p class="caption"><span class="caption-number">Fig. 10 </span><span class="caption-text">Imported vector data is automatically displayed in the <em>Map Display</em>
+window. Progress of import is shown in the <span class="item">Console</span> tab.</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+</div>
+<p id="copy-map">Let’s copy the world map from the default location into the current location
+for a better feeling of where tiles are geographically located.</p>
+<div class="figure align-center" id="id3">
+<img alt="../_images/copy-0.png" src="../_images/copy-0.png" />
+<p class="caption"><span class="caption-number">Fig. 11 </span><span class="caption-text">Expand <em>world_latlong_wgs84</em> location and select
+<em>country_boundaries</em> vector map.</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
+</div>
+<div class="figure align-center" id="id4">
+<img alt="../_images/copy-1.png" src="../_images/copy-1.png" />
+<p class="caption"><span class="caption-number">Fig. 12 </span><span class="caption-text">Select the current location and mapset and paste the selected
+data.</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
+</div>
+<div class="figure align-center" id="id5">
+<img alt="../_images/copy-2.png" src="../_images/copy-2.png" />
+<p class="caption"><span class="caption-number">Fig. 13 </span><span class="caption-text">Coordinate reference systems of source (<a class="reference external" href="http://epsg.io/4326">EPSG:4326</a>) and target
+(<a class="reference external" href="http://epsg.io/3035">EPSG:3035</a>) locations are different. GRASS will re-project
+data. Let’s keep the default value for the maximum segment length (10km).</span><a class="headerlink" href="#id5" title="Permalink to this image">¶</a></p>
+</div>
+<p>To display copied vector data go to the <span class="item">Data</span> tab, choose
+the layer to be displayed and from the contextual menu choose
+<span class="item">Display layer</span> (or use double-click on the layer).</p>
+<div class="figure align-center" id="id6">
+<img alt="../_images/display-layer.png" src="../_images/display-layer.png" />
+<p class="caption"><span class="caption-number">Fig. 14 </span><span class="caption-text">Display layer from Data tab.</span><a class="headerlink" href="#id6" title="Permalink to this image">¶</a></p>
+</div>
+<p>After displaying data, go to the <span class="item">Display</span> tab and re-order
+layers. From the contextual menu choose <span class="item">Properties</span> (or use
+double-click on layer).</p>
+<div class="figure align-center" id="id7">
+<img alt="../_images/display-properties.png" src="../_images/display-properties.png" />
+<p class="caption"><span class="caption-number">Fig. 15 </span><span class="caption-text">Open layer properties dialog.</span><a class="headerlink" href="#id7" title="Permalink to this image">¶</a></p>
+</div>
+<div class="figure align-center" id="id8">
+<img alt="../_images/d-vect-fill-color.png" src="../_images/d-vect-fill-color.png" />
+<p class="caption"><span class="caption-number">Fig. 16 </span><span class="caption-text">Select fill color.</span><a class="headerlink" href="#id8" title="Permalink to this image">¶</a></p>
+</div>
+<div class="figure align-center" id="id9">
+<img alt="../_images/odse_tiles_countries.png" class="large" src="../_images/odse_tiles_countries.png" />
+<p class="caption"><span class="caption-number">Fig. 17 </span><span class="caption-text">Final map composition.</span><a class="headerlink" href="#id9" title="Permalink to this image">¶</a></p>
+</div>
+</div>
+<div class="section" id="raster-data">
+<h2>Raster data<a class="headerlink" href="#raster-data" title="Permalink to this headline">¶</a></h2>
+<p>Let’s import sample ODSE tiles (<code class="file docutils literal notranslate"><span class="pre">dtm_5606.tif</span></code>) raster data
+from the toolbar <a class="reference internal" href="../_images/raster-import.png"><img alt="grass-raster-import" src="../_images/raster-import.png" style="width: 1.5em;" /></a> <sup>Import raster data
+[r.import]</sup>.</p>
+<div class="figure align-center" id="id10">
+<img alt="../_images/dtm_import.png" src="../_images/dtm_import.png" />
+<p class="caption"><span class="caption-number">Fig. 18 </span><span class="caption-text">Select input raster file to be imported.</span><a class="headerlink" href="#id10" title="Permalink to this image">¶</a></p>
+</div>
+<div class="figure align-center" id="id11">
+<img alt="../_images/dtm.png" class="large" src="../_images/dtm.png" />
+<p class="caption"><span class="caption-number">Fig. 19 </span><span class="caption-text">Imported raster data is automatically displayed in the <em>Map Display</em>
+window. Progress of import is shown in the <span class="item">Console</span> tab.
+The default color table is not perfect as you can see, but color
+interpretation will be enhanced in <a class="reference internal" href="04.html#color-table"><span class="std std-ref">Unit 04</span></a>.</span><a class="headerlink" href="#id11" title="Permalink to this image">¶</a></p>
+</div>
+<p id="raster-metadata">Basic raster metadata can be printed using <a class="reference external" href="http://grass.osgeo.org/grass79/manuals/r.info.html">r.info</a> or from
+the Layer Manager.</p>
+<div class="figure align-center" id="id12">
+<img alt="../_images/raster-metadata.png" src="../_images/raster-metadata.png" />
+<p class="caption"><span class="caption-number">Fig. 20 </span><span class="caption-text">Show raster metadata from the contextual menu.</span><a class="headerlink" href="#id12" title="Permalink to this image">¶</a></p>
+</div>
+<div class="figure align-center" id="id13">
+<img alt="../_images/raster-metadata-cell.png" src="../_images/raster-metadata-cell.png" />
+<p class="caption"><span class="caption-number">Fig. 21 </span><span class="caption-text">Detail of raster metadata.</span><a class="headerlink" href="#id13" title="Permalink to this image">¶</a></p>
+</div>
+<p>Raster maps are represented by a regular grid. Three data types are
+supported:</p>
+<ul class="simple">
+<li><p>CELL (integer)</p></li>
+<li><p>FCELL (float)</p></li>
+<li><p>DCELL (double)</p></li>
+</ul>
+</div>
+<div class="section" id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Permalink to this headline">¶</a></h2>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>If the spatial reference system (SRS) of a raster file
+differs from that of the GRASS location (<span class="item">Project match</span>), the
+input raster data is automatically reprojected into the SRS of the
+current GRASS location. Note that GRASS simply does not support on the
+fly transformation for several reasons.</p>
+</div>
+<div class="admonition note" id="import-no-srs">
+<p class="admonition-title">Note</p>
+<p>In some cases, SRS of imported files can be missing or
+invalid. GRASS reports this issue as: <em>In case of no
+significant differences in the projection definitions, use
+the -o flag to ignore them and use current location
+definition. Consider generating a new location from the
+input dataset using the ‘location’ parameter.</em></p>
+<p>GRASS allows importing such files by overriding project check
+(if you are really sure that SRS of the input file is the same
+as GRASS location).</p>
+</div>
+<div class="section" id="vector-topology">
+<span id="vector-topo-section"></span><h3>Vector topology<a class="headerlink" href="#vector-topology" title="Permalink to this headline">¶</a></h3>
+<p>Let’s take a closer look at vector metadata of imported administrative
+regions. Instead of “polygons” there are “areas” and other kinds of
+primitives (points, lines, boundaries, centroids, islands), see
+<a class="reference internal" href="#vector-metadata"><span class="std std-numref">Fig. 22</span></a>.</p>
+<div class="figure align-center" id="id14">
+<span id="vector-metadata"></span><img alt="../_images/vector-metadata-features.png" src="../_images/vector-metadata-features.png" />
+<p class="caption"><span class="caption-number">Fig. 22 </span><span class="caption-text">Vector metadata of the imported file.</span><a class="headerlink" href="#id14" title="Permalink to this image">¶</a></p>
+</div>
+<p>GRASS GIS is a <strong>topological GIS</strong>. Importing vector data into GRASS also
+means converting features from the simple feature model (points,
+linestrings, polygons, …) into the GRASS topological model.</p>
+<div class="figure align-center" id="id15">
+<img alt="../_images/grass7-topo.png" class="middle" src="../_images/grass7-topo.png" />
+<p class="caption"><span class="caption-number">Fig. 23 </span><span class="caption-text">GRASS topological model with primitives (nodes, lines,
+boundaries, centroids, areas, and islands).</span><a class="headerlink" href="#id15" title="Permalink to this image">¶</a></p>
+</div>
+<p>Topological errors are checked and repaired by GRASS GIS when
+importing vector data, be aware of the <span class="param">snap</span> option in
+<a class="reference external" href="http://grass.osgeo.org/grass79/manuals/v.import.html">v.import</a> module. Topological errors impossible
+to be repaired automatically without user specification can be fixed using
+<a class="reference external" href="http://grass.osgeo.org/grass79/manuals/v.clean.html">v.clean</a> module.</p>
+</div>
+<div class="section" id="linking-external-formats">
+<span id="link-external"></span><h3>Linking external formats<a class="headerlink" href="#linking-external-formats" title="Permalink to this headline">¶</a></h3>
+<p>To avoid data duplication GRASS also allows linking raster data using
+<a class="reference external" href="http://grass.osgeo.org/grass79/manuals/r.external.html">r.external</a> (<em>Link external raster data</em>) and vector data
+by means of <a class="reference external" href="http://grass.osgeo.org/grass79/manuals/v.external.html">v.external</a> (<em>Link external vector data</em>).</p>
+<div class="figure align-center" id="id16">
+<img alt="../_images/link-data-menu.png" class="middle" src="../_images/link-data-menu.png" />
+<p class="caption"><span class="caption-number">Fig. 24 </span><span class="caption-text">Link raster or vector data.</span><a class="headerlink" href="#id16" title="Permalink to this image">¶</a></p>
+</div>
+<p>Linking data is mainly recommended when working with raster data such as
+large datasets of imagery data. GRASS can handle linked raster data
+similarly to native raster maps, both in terms of stability and
+accessibility.</p>
+</div>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          
+          <h3>Table of Contents</h3>
+          <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="01.html">[Part 1] About GRASS GIS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02.html">[Part 1] First steps</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">[Part 1] Data Management</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#vector-data">Vector data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#raster-data">Raster data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#notes">Notes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="04.html">[Part 1] Modules, Region</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05.html">[Part 1] Raster processing</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="06.html">[Part 2] Accessing Sentinel EO data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="07.html">[Part 2] Time series data processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="08.html">[Part 2] Temporal Framework Python API</a></li>
+</ul>
+
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="../search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+            </form>
+          </div>
+
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="02.html" title="[Part 1] First steps"
+              >previous</a> |
+            <a href="04.html" title="[Part 1] Modules, Region"
+              >next</a>
+          </div>
+          <div role="note" aria-label="source link">
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021 CTU GeoForAll Lab.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.3.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>
