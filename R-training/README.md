@@ -4,7 +4,7 @@ using spatiotemporal Ensemble ML
 Created and maintained by: Tom Hengl (<tom.hengl@OpenGeoHub.org>) |
 Leandro L. Parente (<leandro.parente@OpenGeoHub.org>) | Carmelo
 Bonannella (<carmelo.bonannella@OpenGeoHub.org>)
-Last compiled on: 07 September, 2021
+Last compiled on: 08 September, 2021
 
 
 
@@ -27,8 +27,6 @@ Last compiled on: 07 September, 2021
         neighbors](#spatial-interpolation-using-ml-and-geographical-distances-to-neighbors)
   - [Spatiotemporal Ensemble ML in R](#spatiotemporal-ensemble-ml-in-r)
       - [Ensemble ML](#ensemble-ml)
-      - [Ensemble ML using the mlr
-        package](#ensemble-ml-using-the-mlr-package)
       - [Case study: Daily temperatures](#case-study-daily-temperatures)
       - [Case study: Cookfarm dataset](#case-study-cookfarm-dataset)
       - [Case study: Spatiotemporal distribution of Fagus
@@ -48,8 +46,8 @@ License](http://creativecommons.org/licenses/by-sa/4.0/).
 
 #### Spatiotemporal data
 
-Spatiotemporal data is any data that is referenced in both space and
-time. This implies that the following coordinates are known:
+Spatiotemporal data is practicaly any data that is referenced in both
+space and time. This implies that the following *coordinates* are known:
 
   - geographic location (longitude and latitude or projected \(X,Y\)
     coordinates);
@@ -63,6 +61,7 @@ Consider for example daily temperature measured at some meteorological
 station. This would have the following coordinates:
 
 ``` r
+temp = 22
 lat = 44.56123
 lon = 19.27734
 delta.xy = 30
@@ -113,7 +112,8 @@ Pebesma, & others, [2015](#ref-hengl2015plotkml)).*
 
 The plot shows distribution of meteorological stations over Croatia, and
 then repeated measurements through time. This dataset is further used in
-the use case examples.
+the use case examples to produce spatiotemporal predictions of daily
+temperatures.
 
 #### Time-series analysis
 
@@ -123,10 +123,10 @@ is known as **time-series analysis**. Some systematic guides on how to
 run time-series analysis in R can be found
 [here](http://r-statistics.co/Time-Series-Analysis-With-R.html).
 
-How variable changes through time can often be drastically different
-from the spatial patterns. In general one can say that, for many
-environmental variables, variation of values can be separated into
-**components** such as:
+How a variable changes through time can often be drastically different
+from how it changes in space (spatial patterns). In general one can say
+that, for many environmental variables, variation of values through time
+can be separated into **components** such as:
 
   - Long-term component (**trend**) determined by long-term geological
     and extraterrestrial processes,
@@ -147,7 +147,7 @@ Sun’s energy output resulting in gradual drops and rises of global mean
 temperature ([glacials and
 interglacials](https://en.wikipedia.org/wiki/Ice_age)):
 
-<img src="img/Fig_global_mean_temp_longterm_trend.png" width="750"/>
+<img src="img/Fig_global_mean_temp_longterm_trend.png" width="650"/>
 
 *Figure: Global temperature reconstruction from proxy data of Marcott,
 Shakun, Clark, & Mix ([2013](#ref-Marcott1198)). This shows how global
@@ -168,9 +168,10 @@ at one station at Cook Agronomy Farm from January 2011–January 2014. The
 black line indicates locally fitted splines (Gasch et al.,
 [2015](#ref-gasch2015spatio)).*
 
-As we will see later, the seasonal daily and monthly part of variation
-is systematic and can be modeling using latitude, altitude and time/day
-of the year.
+This data set is further discussed in the case studies to demonstrate
+3D+T spatiotemporal modeling. As we will see later, the seasonal daily
+and monthly part of variation is systematic and can be modeling using
+latitude, altitude and time/day of the year.
 
 #### Visualizing spatiotemporal data
 
@@ -179,7 +180,7 @@ e.g. [mapview](https://r-spatial.github.io/mapview/) and/or [tmap
 package](https://cran.r-project.org/web/packages/tmap/vignettes/tmap-getstarted.html)).
 Spatiotemporal data (2D+T) is more complex to visualize than 2D data,
 while 3D+T data can even require some expertise in the field (Hengl et
-al., [2015](#ref-hengl2015plotkml)) before user can make any seamless
+al., [2015](#ref-hengl2015plotkml)) before an user can make any seamless
 interpretation.
 
 There are three possible groups of ways to visualize spatiotemporal
@@ -188,7 +189,7 @@ data:
 1.  Using **static images** showing trend parameters together with
     time-series plots at selected representative point locations.  
 2.  Using **time-slices** or series of visualizations of the same
-    spatial domain but changing in time.  
+    spatial domain but changing in time (time-lapses).  
 3.  Using **animations** or **interactive plots with time-sliders**
     allowing users to choose *speed* and *direction* of animation.
 
@@ -199,10 +200,10 @@ by using the <https://geemap.org/> package (*A Python package for
 interactive mapping with Google Earth Engine, ipyleaflet, and
 ipywidgets*).
 
-OpenLandMap.org has multiple temporal datasets and users can interactive
-with time-dimension by using the time-slider implemented in [OpenLayers
-and Geoserver](http://osgl.grf.bg.ac.rs/books/gvvk-en/) (Kilibarda &
-Protić, [2019](#ref-KilibardaProtic2019)).
+OpenLandMap.org also has multiple temporal datasets and users can
+interactive with time-dimension by using the time-slider implemented in
+[OpenLayers and Geoserver](http://osgl.grf.bg.ac.rs/books/gvvk-en/)
+(Kilibarda & Protić, [2019](#ref-KilibardaProtic2019)).
 
 <img src="img/Fig_HILDA_visualization_landcover.gif" width="750"/>
 
@@ -217,9 +218,7 @@ samples are used to interpolate within the spacetime cube. This
 obviously assumes that enough point measurements are available and which
 are spread in both space and time. We will show in this tutorial how
 Machine Learning can be used to interpolate values within the spacetime
-cube.
-
-Spatiotemporal interpolation using various kriging methods is
+cube. Spatiotemporal interpolation using various kriging methods is
 implemented in the [gstat
 package](https://cran.r-project.org/web/packages/gstat/vignettes/spatio-temporal-kriging.pdf)
 and is not addressed in this tutorial.
@@ -308,8 +307,8 @@ Geometric temperature function plot.
 
 #### Standard ML steps
 
-Standard spatiotemporal ML for predictive mapping includes the following
-steps:
+Standard spatiotemporal ML for predictive mapping typically includes the
+following steps:
 
 1.  Prepare training (points) data and data cube with all covariates
     ideally as an analysis-ready datacube.
@@ -935,9 +934,8 @@ Ensemble Machine Learning for predictive mapping in 2D and 3D is
 discussed in detail in [this R
 tutorial](https://gitlab.com/openlandmap/spatial-predictions-using-eml).
 This tutorial focuses primarily on using EML for spatiotemporal data
-sets (2D+T, 3D+T).
-
-#### Ensemble ML using the mlr package
+sets (2D+T, 3D+T). In this tutorial we use `mlr` Machine Learning
+framework to fit spatiotemporal models and generate predictions.
 
 #### Case study: Daily temperatures
 
@@ -1607,14 +1605,14 @@ visualize changes using e.g. the `animation` package.
 
 #### Case study: Spatiotemporal distribution of Fagus sylvatica
 
-In the next example we demonstrate how to fit a spatiotemporal model
-using biological data: occurrences of [*Fagus
+In the next example we show how to fit a spatiotemporal model using
+biological data: occurrences of [*Fagus
 sylvatica*](https://www.gbif.org/species/2882316) over Europe. This is
 the domain of **Species Distribution modeling**, except in this case we
-model distribution of target species also in spacetime. The point data
-has been compiled for the purpose of the OpenDataScience.eu project,
-then cleaned and overlaid vs time-series of Landsat GLAD images and
-climatic variables. For more details refer to the [eumap
+model distribution of target species also in spacetime. The training
+(point) data has been compiled for the purpose of the OpenDataScience.eu
+project, then cleaned and overlaid vs time-series of Landsat GLAD images
+and climatic variables. For more details refer to the [eumap
 repository](https://gitlab.com/geoharmonizer_inea/eumap).
 
 We can load a snapshot of data by using:
