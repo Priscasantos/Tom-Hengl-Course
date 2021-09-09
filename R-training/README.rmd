@@ -116,7 +116,7 @@ is known as **time-series analysis**. Some systematic guides on how to
 run time-series analysis in R can be found
 [here](http://r-statistics.co/Time-Series-Analysis-With-R.html).
 
-How a variable changes through time can often be drastically different 
+How a variable varies through time (time-series curves) can often be drastically different 
 from how it changes in space (spatial patterns). In general one can say that, for many 
 environmental variables, variation of values through time can be separated into 
 **components** such as:
@@ -1018,7 +1018,7 @@ the domain of **Species Distribution modeling**, except in this case we
 model distribution of target species also in spacetime. The training (point) data has
 been compiled for the purpose of the OpenDataScience.eu project, then
 cleaned and overlaid vs time-series of Landsat GLAD images and climatic
-variables. For more details refer to the [eumap
+variables [@witjes2021spatiotemporal]. For more details refer to the [eumap
 repository](https://gitlab.com/geoharmonizer_inea/eumap).
 
 We can load a snapshot of data by using:
@@ -1193,33 +1193,35 @@ spatiotemporal data and demonstrated how to use ML, specifically
 Ensemble ML, to train spatiotemporal models and produce time-series of
 predictions. We have also shown, using some synthetic and real-life datasets, how
 incorrectly setting up training and cross-validation can lead to
-over-fitting problems.
+over-fitting problems. This was done to help users realize that Machine Learning, 
+however trivial it might seem, is not a click-a-button process and solid knowledge 
+and understanding of advanced statistics (regression, hypothesis testing, 
+resampling, probability theory) is still required.
 
 For spatiotemporal models, we recommend combining and using covariates that 
 can represent long-term or accumulated effects of climate, together with 
 covariates that can represent daily to monthly oscillation of variables such as soil
 moisture, temperatures and similar. During the design of the modeling system, 
-we highly recommend first **trying to understand ecology and processes behind 
-variable of interest** the designing the modeling system to best reflect expert 
-knowledge. The example in @gasch2015spatio shows how in-depth 
+we highly recommend **trying to understand ecology and processes behind 
+variable of interest** first, then designing the modeling system to best reflect expert 
+knowledge. The example with RF over-fitting data in @gasch2015spatio shows how in-depth 
 understanding of the problem can help design modeling framework and prevent 
 from over-fitting problems and similar.
 
 Where time-series EO data exists, these can be also incorporated into the 
 mapping algorithm as shown with three case studies. For spacetime overlays we 
-recommend using Cloud-Optimized GeoTIFFs and the `terra` package [@hijmans2019spatial] which helps speed-up overlays.
+recommend using Cloud-Optimized GeoTIFFs and the `terra` package [@hijmans2019spatial] which helps speed-up overlays. Other options for efficient overlay are the `stars` and `gdalcubes` package [@appel2019demand].
 
 Spatiotemporal datasets can be at the order of magnitude larger, hence
 it is important, when implementing analysis of spatiotemporal data, to
-consider computing optimization, which typically implies:
+consider **computing optimization**, which typically implies:
 
 -   Running operations in parallel;
 -   Separating fine-tuning and parameter optimization (best to run on
-    subset) from predictions,
+    subset and save computing time) from predictions,
 -   Using tiling systems to run overlay, predictions and visualizations,
 
-Finally, the generic steps to fit spatiotemporal models described in this
-tutorial include:
+Finally, we recommend following these generic steps to fit spatiotemporal models:
 
 1.  Prepare training (points) data and data cube with all covariates
     referenced in spacetime.  
@@ -1233,21 +1235,21 @@ tutorial include:
 5.  Generate predictions in spacetime — create time-series of
     predictions.  
 6.  (optional) Run change-detection / trend analysis and try to detect
-    main drivers of positive / negative trends.  
+    main drivers of positive / negative trends [@witjes2021spatiotemporal].  
 7.  Deploy predictions as Cloud-Optimized GeoTIFF and produce the final
-    report with mapping accuracy, variable importance.
+    report with mapping accuracy, variable importance.  
 
-Ensemble ML framework we used clearly offers many benefits but it comes
-at a cost of at the order of magnitude higher computational load. Also
-interpretation of such models can be a cumbersome as there a multiple
-learners plus a meta-learner, so it often becomes difficult to
-track-back individual relationship between variables. To decrease such
-problems we recommend studying the [Interpretable Machine
+Ensemble ML framework we used here clearly offers many benefits but it comes 
+at a cost of at the order of magnitude higher computational load. Also 
+interpretation of such models can be a cumbersome as there a multiple 
+learners plus a meta-learner, so it often becomes difficult to 
+track-back individual relationship between variables. To help increase 
+confidence in the produced models, we recommend studying the [Interpretable Machine
 Learning](https://christophm.github.io/interpretable-ml-book/) methods
-[@molnar2020interpretable] and running additional diagnostics, and
-intensively plotting of the data in space and spacetime .
+[@molnar2020interpretable], running additional model diagnostics, and
+intensively plotting data in space and spacetime and feature space.
 
-Note that the `mlr` package is discontinued, so some of the example
+Note that the `mlr` package is discontinued, so some of the examples 
 above might become unstable with time. You are advised instead to use
 the new [mlr3 package](https://mlr3.mlr-org.com/).
 

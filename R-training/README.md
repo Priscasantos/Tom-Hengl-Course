@@ -4,7 +4,7 @@ using spatiotemporal Ensemble ML
 Created and maintained by: Tom Hengl (<tom.hengl@OpenGeoHub.org>) |
 Leandro L. Parente (<leandro.parente@OpenGeoHub.org>) | Carmelo
 Bonannella (<carmelo.bonannella@OpenGeoHub.org>)
-Last compiled on: 08 September, 2021
+Last compiled on: 09 September, 2021
 
 
 
@@ -123,10 +123,10 @@ is known as **time-series analysis**. Some systematic guides on how to
 run time-series analysis in R can be found
 [here](http://r-statistics.co/Time-Series-Analysis-With-R.html).
 
-How a variable changes through time can often be drastically different
-from how it changes in space (spatial patterns). In general one can say
-that, for many environmental variables, variation of values through time
-can be separated into **components** such as:
+How a variable varies through time (time-series curves) can often be
+drastically different from how it changes in space (spatial patterns).
+In general one can say that, for many environmental variables, variation
+of values through time can be separated into **components** such as:
 
   - Long-term component (**trend**) determined by long-term geological
     and extraterrestrial processes,
@@ -881,8 +881,8 @@ rf_RFSI
     ## Target node size:                 5 
     ## Variable importance mode:         impurity 
     ## Splitrule:                        variance 
-    ## OOB prediction error (MSE):       72615.86 
-    ## R squared (OOB):                  0.4610795
+    ## OOB prediction error (MSE):       70491.11 
+    ## R squared (OOB):                  0.4768483
 
 To produce predictions we can run:
 
@@ -1193,8 +1193,8 @@ Train model using a subset of points:
     ## Mapping in parallel: mode = socket; level = mlr.resample; cpus = 12; elements = 10.
 
     ## # weights:  19
-    ## initial  value 1892102.547382 
-    ## final  value 512974.365752 
+    ## initial  value 1697880.074667 
+    ## final  value 510627.099374 
     ## converged
 
     ## Exporting objects to slaves for mode socket: .mlr.slave.options
@@ -1216,20 +1216,20 @@ summary(eml.TMP$learner.model$super.model$learner.model)
     ## 
     ## Residuals:
     ##      Min       1Q   Median       3Q      Max 
-    ## -17.7910  -1.8282   0.0673   1.8112  12.4129 
+    ## -18.1846  -1.7732   0.0634   1.7426  13.6272 
     ## 
     ## Coefficients:
     ##               Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)   10.65213    6.08547   1.750   0.0801 .  
-    ## regr.ranger    0.67279    0.02825  23.813   <2e-16 ***
-    ## regr.nnet     -0.83706    0.47593  -1.759   0.0787 .  
-    ## regr.gamboost  0.33010    0.02846  11.597   <2e-16 ***
+    ## (Intercept)   21.14092    7.71985   2.739  0.00619 ** 
+    ## regr.ranger    0.67708    0.02853  23.729  < 2e-16 ***
+    ## regr.nnet     -1.65464    0.60328  -2.743  0.00611 ** 
+    ## regr.gamboost  0.32538    0.02871  11.332  < 2e-16 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 2.896 on 7590 degrees of freedom
-    ## Multiple R-squared:  0.8759, Adjusted R-squared:  0.8759 
-    ## F-statistic: 1.786e+04 on 3 and 7590 DF,  p-value: < 2.2e-16
+    ## Residual standard error: 2.853 on 7590 degrees of freedom
+    ## Multiple R-squared:  0.879,  Adjusted R-squared:  0.879 
+    ## F-statistic: 1.839e+04 on 3 and 7590 DF,  p-value: < 2.2e-16
 
 The variable importance show that the most important variable for
 predicting daily temperatures is in fact the night-time temperature:
@@ -1483,8 +1483,8 @@ m.vw
     ## Target node size:                 5 
     ## Variable importance mode:         none 
     ## Splitrule:                        variance 
-    ## OOB prediction error (MSE):       0.0009766977 
-    ## R squared (OOB):                  0.8489105
+    ## OOB prediction error (MSE):       0.0009663927 
+    ## R squared (OOB):                  0.8505046
 
 which shows that a significant model can be fitting using this data with
 R-square above 0.80. This model, however, as shown in Gasch et al.
@@ -1515,7 +1515,7 @@ tsk.st
     ## Supervised task: cookfarm.rm[subs, all.vars(fm)]
     ## Type: regr
     ## Target: VW
-    ## Observations: 5412
+    ## Observations: 5410
     ## Features:
     ##    numerics     factors     ordered functionals 
     ##           9           0           0           0 
@@ -1557,20 +1557,20 @@ summary(eml.VW$learner.model$super.model$learner.model)
     ## 
     ## Residuals:
     ##       Min        1Q    Median        3Q       Max 
-    ## -0.179087 -0.044913  0.003077  0.044072  0.182946 
+    ## -0.182776 -0.043441  0.005224  0.044188  0.192935 
     ## 
     ## Coefficients:
     ##                Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)    0.022398   0.008316   2.693   0.0071 ** 
-    ## regr.ranger    1.023343   0.028273  36.195   <2e-16 ***
-    ## regr.gamboost -0.652231   0.067587  -9.650   <2e-16 ***
-    ## regr.cvglmnet  0.555139   0.050500  10.993   <2e-16 ***
+    ## (Intercept)    0.028742   0.009002   3.193  0.00142 ** 
+    ## regr.ranger    1.024545   0.028339  36.154  < 2e-16 ***
+    ## regr.gamboost -0.545819   0.072491  -7.530 5.93e-14 ***
+    ## regr.cvglmnet  0.424197   0.051218   8.282  < 2e-16 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 0.0622 on 5408 degrees of freedom
-    ## Multiple R-squared:  0.411,  Adjusted R-squared:  0.4107 
-    ## F-statistic:  1258 on 3 and 5408 DF,  p-value: < 2.2e-16
+    ## Residual standard error: 0.06188 on 5406 degrees of freedom
+    ## Multiple R-squared:  0.4091, Adjusted R-squared:  0.4088 
+    ## F-statistic:  1248 on 3 and 5406 DF,  p-value: < 2.2e-16
 
 This is now a 3D+T model of `VW`, which means that we can use it to
 predict values of `VW` at any new `x,y,d,t` location. To make prediction
@@ -1612,8 +1612,9 @@ the domain of **Species Distribution modeling**, except in this case we
 model distribution of target species also in spacetime. The training
 (point) data has been compiled for the purpose of the OpenDataScience.eu
 project, then cleaned and overlaid vs time-series of Landsat GLAD images
-and climatic variables. For more details refer to the [eumap
-repository](https://gitlab.com/geoharmonizer_inea/eumap).
+and climatic variables (Witjes et al.,
+[n.d.](#ref-witjes2021spatiotemporal)). For more details refer to the
+[eumap repository](https://gitlab.com/geoharmonizer_inea/eumap).
 
 We can load a snapshot of data by using:
 
@@ -1896,36 +1897,42 @@ spatiotemporal data and demonstrated how to use ML, specifically
 Ensemble ML, to train spatiotemporal models and produce time-series of
 predictions. We have also shown, using some synthetic and real-life
 datasets, how incorrectly setting up training and cross-validation can
-lead to over-fitting problems.
+lead to over-fitting problems. This was done to help users realize that
+Machine Learning, however trivial it might seem, is not a click-a-button
+process and solid knowledge and understanding of advanced statistics
+(regression, hypothesis testing, resampling, probability theory) is
+still required.
 
 For spatiotemporal models, we recommend combining and using covariates
 that can represent long-term or accumulated effects of climate, together
 with covariates that can represent daily to monthly oscillation of
 variables such as soil moisture, temperatures and similar. During the
-design of the modeling system, we highly recommend first **trying to
-understand ecology and processes behind variable of interest** the
-designing the modeling system to best reflect expert knowledge. The
-example in Gasch et al. ([2015](#ref-gasch2015spatio)) shows how
-in-depth understanding of the problem can help design modeling framework
-and prevent from over-fitting problems and similar.
+design of the modeling system, we highly recommend **trying to
+understand ecology and processes behind variable of interest** first,
+then designing the modeling system to best reflect expert knowledge. The
+example with RF over-fitting data in Gasch et al.
+([2015](#ref-gasch2015spatio)) shows how in-depth understanding of the
+problem can help design modeling framework and prevent from over-fitting
+problems and similar.
 
 Where time-series EO data exists, these can be also incorporated into
 the mapping algorithm as shown with three case studies. For spacetime
 overlays we recommend using Cloud-Optimized GeoTIFFs and the `terra`
 package (Hijmans, [2019](#ref-hijmans2019spatial)) which helps speed-up
-overlays.
+overlays. Other options for efficient overlay are the `stars` and
+`gdalcubes` package (Appel & Pebesma, [2019](#ref-appel2019demand)).
 
 Spatiotemporal datasets can be at the order of magnitude larger, hence
 it is important, when implementing analysis of spatiotemporal data, to
-consider computing optimization, which typically implies:
+consider **computing optimization**, which typically implies:
 
   - Running operations in parallel;
   - Separating fine-tuning and parameter optimization (best to run on
-    subset) from predictions,
+    subset and save computing time) from predictions,
   - Using tiling systems to run overlay, predictions and visualizations,
 
-Finally, the generic steps to fit spatiotemporal models described in
-this tutorial include:
+Finally, we recommend following these generic steps to fit
+spatiotemporal models:
 
 1.  Prepare training (points) data and data cube with all covariates
     referenced in spacetime.  
@@ -1939,28 +1946,38 @@ this tutorial include:
 5.  Generate predictions in spacetime — create time-series of
     predictions.  
 6.  (optional) Run change-detection / trend analysis and try to detect
-    main drivers of positive / negative trends.  
+    main drivers of positive / negative trends (Witjes et al.,
+    [n.d.](#ref-witjes2021spatiotemporal)).  
 7.  Deploy predictions as Cloud-Optimized GeoTIFF and produce the final
     report with mapping accuracy, variable importance.
 
-Ensemble ML framework we used clearly offers many benefits but it comes
-at a cost of at the order of magnitude higher computational load. Also
-interpretation of such models can be a cumbersome as there a multiple
-learners plus a meta-learner, so it often becomes difficult to
-track-back individual relationship between variables. To decrease such
-problems we recommend studying the [Interpretable Machine
+Ensemble ML framework we used here clearly offers many benefits but it
+comes at a cost of at the order of magnitude higher computational load.
+Also interpretation of such models can be a cumbersome as there a
+multiple learners plus a meta-learner, so it often becomes difficult to
+track-back individual relationship between variables. To help increase
+confidence in the produced models, we recommend studying the
+[Interpretable Machine
 Learning](https://christophm.github.io/interpretable-ml-book/) methods
-(Molnar, [2020](#ref-molnar2020interpretable)) and running additional
-diagnostics, and intensively plotting of the data in space and spacetime
-.
+(Molnar, [2020](#ref-molnar2020interpretable)), running additional model
+diagnostics, and intensively plotting data in space and spacetime and
+feature space.
 
-Note that the `mlr` package is discontinued, so some of the example
+Note that the `mlr` package is discontinued, so some of the examples
 above might become unstable with time. You are advised instead to use
 the new [mlr3 package](https://mlr3.mlr-org.com/).
 
 ## References
 
 <div id="refs" class="references">
+
+<div id="ref-appel2019demand">
+
+Appel, M., & Pebesma, E. (2019). On-demand processing of data cubes from
+satellite image collections with the gdalcubes library. *Data*, *4*(3),
+92. doi:[10.3390/data4030092](https://doi.org/10.3390/data4030092)
+
+</div>
 
 <div id="ref-bischl2016mlr">
 
@@ -2122,6 +2139,16 @@ Publishers.
 
 Wikle, C. K., Zammit-Mangion, A., & Cressie, N. (2019). *Spatio-Temporal
 Statistics with R*. CRC Press.
+
+</div>
+
+<div id="ref-witjes2021spatiotemporal">
+
+Witjes, M., Parente, L., Diemen, C. J. van, Hengl, T., Landa, M.,
+Brodsky, L., … others. (n.d.). A spatiotemporal ensemble machine
+learning framework for generating land use/land cover time-series maps
+for europe (2000–2019) based on lucas, corine and glad landsat. *PeerJ*,
+(in review).
 
 </div>
 
