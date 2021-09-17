@@ -3,5 +3,6 @@
 .RData
 .Ruserdata
 *.RData
+*.aux.xml
 
 .ipynb_checkpoints/
